@@ -79,7 +79,7 @@ public class Main {
 
                     boolean passwordChanged = userModel.changePassword(id, currentPassword, newPassword);
                     if (passwordChanged) {
-                        System.out.println("Password changed successfully!");
+                        System.out.println("\nPassword changed successfully!");
                     } else {
                         System.out.println("Failed to change password. Please try again.");
                     }

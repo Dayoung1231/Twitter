@@ -109,7 +109,7 @@ public class UserModel {
             updateStmt.setString(1, newPwd);
             updateStmt.setString(2, id);
             updateStmt.executeUpdate();
-            System.out.println("Password changed successfully!");
+            //System.out.println("Password changed successfully!");
             return true;
         } catch (Exception e) {
             e.printStackTrace();
