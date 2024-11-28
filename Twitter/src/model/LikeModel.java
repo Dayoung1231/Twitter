@@ -24,7 +24,7 @@ public class LikeModel {
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next()) {
-                System.out.println("\nYou have already liked this post.");
+                // System.out.println("\nYou have already liked this post.");
                 return false; // 중복 좋아요
             }
 

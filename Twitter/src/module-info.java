@@ -1,4 +1,5 @@
 module twitterClone {
+	requires java.desktop;
 
     // 내부에서 사용하는 패키지들 선언
     exports main;         // 메인 실행 패키지

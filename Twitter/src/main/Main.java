@@ -1,3 +1,4 @@
+/*
 package main;
 
 import database.DatabaseConnection;
@@ -224,3 +225,4 @@ public class Main {
         scanner.close();
     }
 }
+*/

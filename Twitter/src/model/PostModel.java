@@ -5,6 +5,7 @@ import database.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class PostModel {
 
@@ -15,30 +16,21 @@ public class PostModel {
      * @param photoUrl 게시글에 첨부된 사진 URL (없을 경우 null)
      * @return 성공 여부 (true: 성공, false: 실패)
      */
-    public boolean createPost(String userId, String message, String photoUrl) {
-    	try (Connection con = DatabaseConnection.getConnection()) {
-            // RETURN_GENERATED_KEYS를 지정하여 자동 생성된 키를 가져올 수 있도록 설정
-            String insertPost = "INSERT INTO posts (writer_id, message, photo_url) VALUES (?, ?, ?)";
-            PreparedStatement stmt = con.prepareStatement(insertPost, PreparedStatement.RETURN_GENERATED_KEYS);
-            stmt.setString(1, userId);
-            stmt.setString(2, message);
-            stmt.setString(3, photoUrl);
-            stmt.executeUpdate();
-
-            // 생성된 게시글 ID 가져오기
-            ResultSet generatedKeys = stmt.getGeneratedKeys();
-            if (generatedKeys != null && generatedKeys.next()) {
-                int postId = generatedKeys.getInt(1); // 생성된 키 가져오기 (첫 번째 열)
-                System.out.println("\nPost created successfully! Post ID: " + postId);
-            } else {
-                System.out.println("\nPost created successfully, but failed to retrieve Post ID.");
-            }
+	public boolean savePost(String userId, String message, String photoUrl) {
+        try (Connection con = DatabaseConnection.getConnection()) {
+            String query = "INSERT INTO posts (writer_id, message, photo_url) VALUES (?, ?, ?)";
+            PreparedStatement pstmt = con.prepareStatement(query);
+            pstmt.setString(1, userId);
+            pstmt.setString(2, message);
+            pstmt.setString(3, photoUrl.isEmpty() ? null : photoUrl);
+            pstmt.executeUpdate();
             return true;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
+	
 
     /**
      * 게시글 조회 기능
