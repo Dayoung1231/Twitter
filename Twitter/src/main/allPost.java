@@ -9,7 +9,6 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.net.URI;
-import javax.swing.JFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -39,7 +38,7 @@ public class allPost {
 		});
 	}
 	
-	
+
 	// 외부에서 프레임을 표시하기 위해 추가한 메서드
     public void setVisible(boolean visible) {
         frame.setVisible(visible);
@@ -94,6 +93,52 @@ public class allPost {
 	    textLabel.setForeground(Color.WHITE);
 	    textLabel.setBounds(60, 15, 99, 30);
 	    topPanel.add(textLabel);
+	    
+	    
+	    // Create 버튼
+        JButton createButton = new JButton("create");
+        createButton.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        createButton.setBounds(290, 20, 80, 26);
+        createButton.setForeground(new Color(106, 181, 249)); // 글자 색상: 흰색
+        createButton.setBackground(Color.WHITE); // 배경 색상: 파란색
+        createButton.setFocusPainted(false); // 클릭 시 포커스 효과 제거
+        createButton.setBorderPainted(false); // 기본 테두리 제거
+        createButton.setOpaque(false); // 불투명 효과 제거
+        createButton.setContentAreaFilled(false); // 버튼 배경 투명 처리
+        topPanel.add(createButton);
+        
+        // Create 버튼 클릭 이벤트
+        createButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                // createPost 클래스의 프레임 호출
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        createPost createPostWindow = new createPost();
+                        createPostWindow.setVisible(true);
+                        frame.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }
+        });
+        
+        // 둥근 버튼 모양 만들기
+        createButton.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
+            @Override
+            public void paint(Graphics g, JComponent c) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // 버튼 배경 채우기
+                g2.setColor(createButton.getBackground());
+                g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 30, 30); // 둥근 사각형: 30px radius
+
+                super.paint(g, c);
+            }
+        });
 	   
 	    
 	    // 하단 패널 생성

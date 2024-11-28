@@ -1,10 +1,11 @@
 package main;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.sql.*;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -15,9 +16,7 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.net.URI;
 
-public class createPost {
-
-	private JFrame frame;
+public class createPost extends JFrame {
 
 	// MySQL 연결 정보
     private static final String DB_URL = "jdbc:mysql://localhost:3306/Twitter";
@@ -56,24 +55,26 @@ public class createPost {
 
 
 	private void initialize() {
-		frame = new JFrame();
-        frame.setBounds(100, 100, 400, 600);
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().setBackground(Color.WHITE);
-        frame.getContentPane().setLayout(null);
+        
+        // JFrame 설정
+        setTitle("Create Post");
+        setBounds(100, 100, 400, 600);
+        setLocationRelativeTo(null);
+        setResizable(false);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setBackground(Color.WHITE);
+        getContentPane().setLayout(null);
         postPanel.setBackground(new Color(255, 255, 255));
         
         // 포스트 패널
         postPanel.setBounds(1, 1, 384, 562);
-        frame.getContentPane().add(postPanel);
+        createPost.this.getContentPane().add(postPanel);
         postPanel.setLayout(null);
         
         // 스크롤 패널
         JScrollPane scrollPane = new JScrollPane(postPanel);
         scrollPane.setBounds(0, 0, 386, 563); // 스크롤 패널 크기 설정
-        frame.getContentPane().add(scrollPane);
+        createPost.this.getContentPane().add(scrollPane);
         
         // 유저 사진 -> 클릭 시 프로필로 이동
         JButton userImageBtn = new JButton();
@@ -87,10 +88,11 @@ public class createPost {
         // 유저 사진 로드 함수 호출
         loadUserImage(userImageBtn, userID);
         
+        
         // 유저 이름
         nameField = new JTextField();
-        nameField.setBounds(79, 29, 106, 21);
-        nameField.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+        nameField.setBounds(85, 22, 300, 23);
+        nameField.setFont(new Font("맑은 고딕", Font.BOLD, 16));
         nameField.setBorder(null);
         postPanel.add(nameField);
         nameField.setColumns(10);
@@ -102,14 +104,16 @@ public class createPost {
             nameField.setText("Unknown User");
         }
         
+        
         // 유저 아이디
         idField = new JTextField();
         idField.setText("@" + userID);
-        idField.setBounds(79, 44, 106, 21);
-        idField.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+        idField.setBounds(85, 45, 300, 15);
+        idField.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
         idField.setBorder(null);
         postPanel.add(idField);
         idField.setColumns(10);
+        
         
         // 포스트 메시지 입력
         messageArea = new JTextArea();
@@ -148,8 +152,27 @@ public class createPost {
         saveButton.setBorderPainted(false); // 기본 테두리 제거
         saveButton.setOpaque(false); // 불투명 효과 제거
         saveButton.setContentAreaFilled(false); // 버튼 배경 투명 처리
-        saveButton.addActionListener(e -> savePost());     // 버튼 클릭 이벤트
         postPanel.add(saveButton);
+        
+        // save 버튼 클릭 이벤트
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            	savePost();
+            	
+                // allPost 클래스의 프레임 호출
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        allPost allPostWindow = new allPost();
+                        allPostWindow.setVisible(true);
+                        createPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }
+        });
         
         // 둥근 버튼 모양 만들기
         saveButton.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
@@ -174,16 +197,16 @@ public class createPost {
 	    String photoUrl = photoURLField.getText().trim();
 
 	    if (message.isEmpty()) {
-	        JOptionPane.showMessageDialog(frame, "Message cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+	        JOptionPane.showMessageDialog(createPost.this, "Message cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
 	        return;
 	    }
 
 	    PostModel postModel = new PostModel();
 	    boolean success = postModel.savePost(userID, message, photoUrl);
 	    if (success) {
-	        JOptionPane.showMessageDialog(frame, "Post saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+	        JOptionPane.showMessageDialog(createPost.this, "Post saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 	    } else {
-	        JOptionPane.showMessageDialog(frame, "Failed to save post.", "Error", JOptionPane.ERROR_MESSAGE);
+	        JOptionPane.showMessageDialog(createPost.this, "Failed to save post.", "Error", JOptionPane.ERROR_MESSAGE);
 	    }
 	}
 

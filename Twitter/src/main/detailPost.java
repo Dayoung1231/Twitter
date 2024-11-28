@@ -342,7 +342,7 @@ public class detailPost extends JFrame {
             
             
             
-            // 저장 버튼
+            // Back 버튼
             JButton backButton = new JButton("Back");
             backButton.setFont(new Font("맑은 고딕", Font.BOLD, 14));
             backButton.setBounds(260, 30, 84, 26);
@@ -359,7 +359,7 @@ public class detailPost extends JFrame {
 	            @Override
 	            public void actionPerformed(ActionEvent e) {
 
-	                // detailPost 클래스의 프레임 호출
+	                // allPost 클래스의 프레임 호출
 	                SwingUtilities.invokeLater(() -> {
 	                    try {
 	                        allPost allPostWindow = new allPost();
