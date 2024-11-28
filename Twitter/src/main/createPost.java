@@ -33,22 +33,6 @@ public class createPost extends JFrame {
     private JTextField photoURLField; // 포토 URL 필드
 
 
-    /*
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					createPost window = new createPost();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-	*/
-
-
 	public createPost() {
 		initialize();
 	}
@@ -91,7 +75,7 @@ public class createPost extends JFrame {
         
         // 유저 이름
         nameField = new JTextField();
-        nameField.setBounds(85, 22, 300, 23);
+        nameField.setBounds(85, 22, 180, 23);
         nameField.setFont(new Font("맑은 고딕", Font.BOLD, 16));
         nameField.setBorder(null);
         postPanel.add(nameField);
@@ -108,7 +92,7 @@ public class createPost extends JFrame {
         // 유저 아이디
         idField = new JTextField();
         idField.setText("@" + userID);
-        idField.setBounds(85, 45, 300, 15);
+        idField.setBounds(85, 45, 180, 15);
         idField.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
         idField.setBorder(null);
         postPanel.add(idField);
@@ -183,6 +167,52 @@ public class createPost extends JFrame {
 
                 // 버튼 배경 채우기
                 g2.setColor(saveButton.getBackground());
+                g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 30, 30); // 둥근 사각형: 30px radius
+
+                super.paint(g, c);
+            }
+        });
+        
+        
+        // Back 버튼
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        backButton.setBounds(283, 35, 84, 26);
+        backButton.setForeground(Color.WHITE); // 글자 색상: 흰색
+        backButton.setBackground(new Color(106, 181, 249)); // 배경 색상: 파란색
+        backButton.setFocusPainted(false); // 클릭 시 포커스 효과 제거
+        backButton.setBorderPainted(false); // 기본 테두리 제거
+        backButton.setOpaque(false); // 불투명 효과 제거
+        backButton.setContentAreaFilled(false); // 버튼 배경 투명 처리
+        postPanel.add(backButton);
+        
+        // Back 버튼 클릭 이벤트
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	
+                // allPost 클래스의 프레임 호출
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        allPost allPostWindow = new allPost();
+                        allPostWindow.setVisible(true);
+                        createPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }
+        });
+        
+        // 둥근 버튼 모양 만들기
+        backButton.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
+            @Override
+            public void paint(Graphics g, JComponent c) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // 버튼 배경 채우기
+                g2.setColor(backButton.getBackground());
                 g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 30, 30); // 둥근 사각형: 30px radius
 
                 super.paint(g, c);
