@@ -31,7 +31,7 @@ public class allPost {
 			public void run() {
 				try {
 					allPost window = new allPost();
-					window.frame.setVisible(true);
+					window.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -40,7 +40,10 @@ public class allPost {
 	}
 	
 	
-
+	// 외부에서 프레임을 표시하기 위해 추가한 메서드
+    public void setVisible(boolean visible) {
+        frame.setVisible(visible);
+    }
 
 
 	public allPost() {
@@ -69,16 +72,6 @@ public class allPost {
 	    topPanel.setLayout(null);
 	    frame.getContentPane().add(topPanel);
 
-	    /*
-	    // 뒤로가기 버튼 생성 -> 프로필로 이동하거나 필요 없으면 삭제
-	    JButton backButton = new JButton("<");
-	    backButton.setBounds(10, 10, 40, 40);
-	    backButton.setFocusPainted(false);
-	    backButton.setFont(new Font("Arial", Font.BOLD, 10));
-	    backButton.setBackground(Color.WHITE);
-	    backButton.setForeground(new Color(29, 161, 242));
-	    topPanel.add(backButton);
-	    */
 
 	    // 트위터 아이콘 로드
 	    try {
@@ -145,7 +138,8 @@ public class allPost {
 
 	    // 스크롤 패널
 	    JScrollPane scrollPane = new JScrollPane(containerPanel);
-	    scrollPane.setBounds(0, 60, 386, 460);//563
+	    scrollPane.setBounds(0, 60, 386, 460);
+	    scrollPane.getVerticalScrollBar().setUnitIncrement(16); // 스크롤 속도 조정
 	    // 세로 스크롤바 스타일 적용
 	    scrollPane.getVerticalScrollBar().setUI(new ScrollBarUI());
 	    scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0)); // 너비를 8로 설정 (이미지처럼 얇게)
@@ -234,6 +228,12 @@ public class allPost {
 	        commentButton.setOpaque(false); // 불투명도 제거
 	        postPanel.add(commentButton);
 
+	        JLabel commentLabel = new JLabel(post[7]); // 댓글 수 표시
+	        commentLabel.setBounds(100, 130, 50, 20);
+	        commentLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+	        commentLabel.setBackground(new Color(245, 245, 245));
+	        postPanel.add(commentLabel);
+	        
 	        // 댓글 아이콘 설정
 	        try {
 	            URL commentIconUrl = getClass().getResource("/images/Comment.png");
@@ -302,6 +302,12 @@ public class allPost {
 	        likeButton.setBorderPainted(false); // 버튼 테두리 제거
 	        likeButton.setOpaque(false); // 버튼 불투명도 제거
 	        postPanel.add(likeButton);
+	        
+	        JLabel likeLabel = new JLabel(post[6]); // 좋아요 수 표시
+	        likeLabel.setBounds(170, 130, 50, 20);
+	        likeLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+	        likeLabel.setBackground(new Color(245, 245, 245));
+	        postPanel.add(likeLabel);
 
 	        // 좋아요 아이콘 설정
 	        try {
@@ -315,11 +321,6 @@ public class allPost {
 	            e.printStackTrace();
 	        }
 
-	        JLabel likeLabel = new JLabel(post[6]); // 좋아요 수 표시
-	        likeLabel.setBounds(170, 130, 50, 20);
-	        likeLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
-	        likeLabel.setBackground(new Color(245, 245, 245));
-	        postPanel.add(likeLabel);
 
 	        likeButton.addActionListener(new ActionListener() {
 	            @Override
@@ -347,6 +348,13 @@ public class allPost {
 	        retweetButton.setOpaque(false); // 불투명도 제거
 	        postPanel.add(retweetButton);
 
+	        JLabel retweetLabel = new JLabel(post[8]); // 리트윗 수 표시
+	        retweetLabel.setBounds(250, 130, 50, 20);
+	        retweetLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+	        retweetLabel.setBackground(new Color(245, 245, 245));
+	        postPanel.add(retweetLabel);
+
+	        
 	        // 리트윗 아이콘 설정
 	        try {
 	            URL retweetIconUrl = getClass().getResource("/images/Retweet.png");
@@ -382,6 +390,12 @@ public class allPost {
 	        bookmarkButton.setBorderPainted(false); // 버튼 테두리 제거
 	        bookmarkButton.setOpaque(false); // 불투명도 제거
 	        postPanel.add(bookmarkButton);
+	        
+	        JLabel bookmarkLabel = new JLabel(post[9]); // 리트윗 수 표시
+	        bookmarkLabel.setBounds(315, 130, 50, 20);
+	        bookmarkLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+	        bookmarkLabel.setBackground(new Color(245, 245, 245));
+	        postPanel.add(bookmarkLabel);
 
 	        // 북마크 아이콘 설정
 	        try {
@@ -462,21 +476,27 @@ public class allPost {
 
 	    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
 	        // 모든 포스트와 유저 이미지를 가져오는 SQL 쿼리
-	        String query = "SELECT u.user_name, p.message, p.created_at, u.image_url, u.user_id, p.post_id, p.num_of_likes " +
+	        String query = "SELECT u.user_name, p.message, p.created_at, u.image_url, u.user_id, p.post_id, p.num_of_likes, " +
+	                "(SELECT COUNT(*) FROM COMMENT WHERE post_id = p.post_id) AS comment_count, " +
+	                "(SELECT COUNT(*) FROM RETWEET WHERE post_id = p.post_id) AS retweet_count, " +
+	                "(SELECT COUNT(*) FROM BOOKMARK WHERE post_id = p.post_id) AS bookmark_count " +
 	                "FROM POSTS p JOIN USER u ON p.writer_id = u.user_id " +
 	                "ORDER BY p.created_at ASC";
 	        PreparedStatement pstmt = conn.prepareStatement(query);
 
 	        ResultSet rs = pstmt.executeQuery();
 	        while (rs.next()) {
-	            String[] postDetails = new String[7]; // 배열 크기를 7로 확장
+	            String[] postDetails = new String[10]; // 배열 크기를 10으로 확장
 	            postDetails[0] = rs.getString("user_name"); // 유저 이름
 	            postDetails[1] = rs.getString("message");   // 메시지
 	            postDetails[2] = rs.getTimestamp("created_at").toString(); // 생성일
 	            postDetails[3] = rs.getString("image_url"); // 유저 이미지 URL
 	            postDetails[4] = rs.getString("user_id");   // 유저 아이디
-	            postDetails[5] = rs.getString("post_id"); // postId 추가
+	            postDetails[5] = rs.getString("post_id");   // postId 추가
 	            postDetails[6] = rs.getString("num_of_likes"); // 좋아요 수
+	            postDetails[7] = String.valueOf(rs.getInt("comment_count")); // 댓글 수
+	            postDetails[8] = String.valueOf(rs.getInt("retweet_count")); // 리트윗 수
+	            postDetails[9] = String.valueOf(rs.getInt("bookmark_count")); // 북마크 수
 	            posts.add(postDetails);
 	        }
 	    } catch (SQLException e) {
@@ -485,6 +505,7 @@ public class allPost {
 
 	    return posts;
 	}
+
 
 
 	private ImageIcon getDefaultUserImageIcon(int diameter) {
