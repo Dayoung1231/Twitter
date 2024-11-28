@@ -25,6 +25,8 @@ public class detailPost extends JFrame {
     private static final String DB_PASSWORD = "ekdud0412?";
 
     private final JPanel postPanel = new JPanel();
+    
+    private int postPosition; // 포스트 위치가 어디까지인지
 
     public detailPost(int postId) {
         initialize(postId);
@@ -43,14 +45,22 @@ public class detailPost extends JFrame {
         // 포스트 패널
         postPanel.setBackground(new Color(255, 255, 255));
         postPanel.setLayout(null);
+        
 
         // 스크롤 패널
-        JScrollPane scrollPane = new JScrollPane(postPanel);
-        scrollPane.setBounds(0, 0, 384, 562);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16); // 스크롤 속도 조정
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); // 가로 스크롤 비활성화
-        add(scrollPane);
-
+	    JScrollPane scrollPane = new JScrollPane(postPanel);
+	    scrollPane.setBounds(0, 0, 386, 563);
+	    scrollPane.getVerticalScrollBar().setUnitIncrement(16); // 스크롤 속도 조정
+	    // 세로 스크롤바 스타일 적용
+	    scrollPane.getVerticalScrollBar().setUI(new ScrollBarUI());
+	    scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0)); // 너비를 8로 설정 (이미지처럼 얇게)
+	    // 가로 스크롤바 숨기기 (필요 시 추가)
+	    scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 0));
+	    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); // 가로 스크롤 비활성화
+	    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); // 세로 스크롤 활성화
+	    detailPost.this.getContentPane().add(scrollPane);
+	    
+	    
         // 데이터베이스에서 포스트 정보 가져오기
         String[] postDetails = loadPostDetails(postId);
 
@@ -91,7 +101,7 @@ public class detailPost extends JFrame {
             messageArea.setLineWrap(true);
             messageArea.setWrapStyleWord(true);
             messageArea.setEditable(false);
-            messageArea.setBounds(10, 80, 350, 100);
+            messageArea.setBounds(10, 80, 360, 100);
             postPanel.add(messageArea);
 
 
@@ -103,7 +113,7 @@ public class detailPost extends JFrame {
                 loadPostImage(imageLabel, postDetails[5]); // 이미지 로드
 
                 // 이미지 위치 및 크기 동적 설정
-                imageLabel.setBounds(10, 180, 350, 200); // 세로 크기는 200, 가로 크기는 비율에 따라 자동
+                imageLabel.setBounds(10, 180, 360, 200); // 세로 크기는 200, 가로 크기는 비율에 따라 자동
                 postPanel.add(imageLabel);
                 
                 // 생성일 위치 설정
@@ -154,16 +164,16 @@ public class detailPost extends JFrame {
 	                commentFrame.setBounds(100, 100, 300, 200);
 	                commentFrame.setLocationRelativeTo(null);
 	                commentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-	                commentFrame.setLayout(new FlowLayout());
+	                commentFrame.getContentPane().setLayout(new FlowLayout());
 
 	                // 입력 필드 생성
 	                JTextField commentField = new JTextField(20);
 	                JLabel messageLabel = new JLabel("Comment:");
 	                JButton submitButton = new JButton("save");
 
-	                commentFrame.add(messageLabel);
-	                commentFrame.add(commentField);
-	                commentFrame.add(submitButton);
+	                commentFrame.getContentPane().add(messageLabel);
+	                commentFrame.getContentPane().add(commentField);
+	                commentFrame.getContentPane().add(submitButton);
 
 	                commentFrame.setVisible(true);
 
@@ -330,7 +340,7 @@ public class detailPost extends JFrame {
 	        });
 	        
 	        JLabel postEndLabel = new JLabel();
-	        postEndLabel.setBounds(10, createdAtYPosition + 50, 350, 5);
+	        postEndLabel.setBounds(10, createdAtYPosition + 50, 360, 5);
 	        postEndLabel.setBackground(new Color(245, 245, 245));
 	        postEndLabel.setBorder(null);
 	        postEndLabel.setOpaque(true);
@@ -339,7 +349,7 @@ public class detailPost extends JFrame {
             
             // 패널 크기 조정 (생성일 위치까지만 포함)
             postPanel.setPreferredSize(new Dimension(380, createdAtYPosition + 30 + 20));
-            
+            postPosition = createdAtYPosition + 30 + 20;
             
             
             // Back 버튼
@@ -392,18 +402,135 @@ public class detailPost extends JFrame {
             JLabel errorLabel = new JLabel("Failed to load post details.");
             errorLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
             errorLabel.setForeground(Color.RED);
-            errorLabel.setBounds(10, 10, 350, 30);
+            errorLabel.setBounds(10, 10, 360, 30);
             postPanel.add(errorLabel);
         }
-    }
+        
+        
+        // 모든 댓글 가져오기
+	    java.util.List<String[]> allComments = loadAllComments(postId);
 
+	    // 각 댓글 정보를 표시할 패널 생성 및 추가
+	    int yOffset = postPosition; // 첫 댓글 간격
+	    int panelHeight = 130; // 각 패널의 높이
+	    for (String[] comment : allComments) {
+	        JPanel commentPanel = new JPanel();
+	        commentPanel.setLayout(null);
+	        commentPanel.setBounds(10, yOffset, 360, panelHeight); // 패널 위치와 크기 설정
+	        commentPanel.setBackground(new Color(255, 255, 255)); // 패널 배경 색상
+	        commentPanel.setBorder(BorderFactory.createLineBorder(new Color(235, 235, 235), 2)); // 회색 테두리, 두께 2
+
+
+	        // 유저 사진 표시
+	        JButton userImageBtn = new JButton();
+	        userImageBtn.setBounds(10, 10, 50, 50);
+	        userImageBtn.setContentAreaFilled(false);
+	        userImageBtn.setBorderPainted(false);
+	        userImageBtn.setFocusPainted(false);
+	        userImageBtn.setOpaque(false);
+	        commentPanel.add(userImageBtn);
+
+	        // 유저 사진 로드
+	        if (comment[6] != null && !comment[6].isEmpty()) {
+	            try {
+	                URI uri = new URI(comment[6]);
+	                URL url = uri.toURL();
+	                ImageIcon circularIcon = createCircularImageIcon(url, 50); // 지름 50px로 생성
+	                userImageBtn.setIcon(circularIcon);
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                userImageBtn.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
+	            }
+	        } else {
+	            userImageBtn.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
+	        }
+
+	        
+	        // 유저 이름과 아이디 표시 (HTML로 스타일 적용)
+	        JLabel nameLabel = new JLabel();
+	        nameLabel.setText("<html><span style='font-size:12px;'>" + comment[5] + "</span> " +
+	                          "<span style='font-size:10px; color:gray;'>@" + comment[2] + "</span></html>");
+	        nameLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 12)); // 기본 폰트 설정 (HTML 내부 스타일로 크기 조정 가능)
+	        nameLabel.setBounds(70, 13, 280, 23); // 크기와 위치 설정
+	        commentPanel.add(nameLabel);
+
+	        
+	        // 포스트 메시지 표시
+	        JTextArea messageArea = new JTextArea();
+	        messageArea.setText(comment[1]); // 메시지 내용
+	        messageArea.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+	        messageArea.setBackground(new Color(245, 245, 245));
+	        messageArea.setLineWrap(true);
+	        messageArea.setWrapStyleWord(true);
+	        messageArea.setEditable(false);
+	        messageArea.setBounds(70, 40, 280, 60);
+	        commentPanel.add(messageArea);
+
+	        // 생성일 표시
+	        JTextField createdAtField = new JTextField();
+	        createdAtField.setText("Created at: " + comment[4]); // 생성일
+	        createdAtField.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+	        createdAtField.setBackground(new Color(245, 245, 245));
+	        createdAtField.setBorder(null);
+	        createdAtField.setEditable(false);
+	        createdAtField.setBounds(70, 104, 280, 20);
+	        commentPanel.add(createdAtField);
+
+
+	        postPanel.add(commentPanel);
+
+	        // 다음 패널의 Y축 위치 계산
+	        yOffset += panelHeight + 10;
+	    }
+
+	    // postPanel의 크기를 모든 포스트 수에 맞게 조정
+	    postPanel.setPreferredSize(new Dimension(380, yOffset));
+	    
+	    // 스크롤바 위치 초기화 (맨 위로 설정)
+	    SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+    }
+    
+
+    private java.util.List<String[]> loadAllComments(int postId) {
+	    java.util.List<String[]> comments = new ArrayList<>();
+
+	    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+	    	// SQL 쿼리: 해당 포스트의 모든 댓글 정보와 댓글 작성자 정보를 가져오기
+	        String query = "SELECT c.comment_id, c.message, c.user_id, c.num_of_likes, c.created_at, " +
+                    "u.user_id AS user_id, u.user_name, u.image_url " +
+                    "FROM COMMENT c " +
+                    "JOIN USER u ON c.user_id = u.user_id " +
+                    "WHERE c.post_id = ? " +
+                    "ORDER BY c.created_at ASC";
+	        
+	        PreparedStatement pstmt = conn.prepareStatement(query);
+	        pstmt.setInt(1, postId); // 해당 포스트 ID로 필터링
+
+	        ResultSet rs = pstmt.executeQuery();
+	        while (rs.next()) {
+	        	String[] commentDetails = new String[8];
+	            commentDetails[0] = rs.getString("comment_id");   // 댓글 ID
+	            commentDetails[1] = rs.getString("message");      // 댓글 메시지
+	            commentDetails[2] = rs.getString("user_id");      // 댓글 작성자 ID
+	            commentDetails[3] = rs.getString("num_of_likes"); // 댓글 좋아요 수
+	            commentDetails[4] = rs.getTimestamp("created_at").toString(); // 댓글 생성일
+	            commentDetails[5] = rs.getString("user_name");    // 댓글 작성자 이름
+	            commentDetails[6] = rs.getString("image_url");    // 댓글 작성자 프로필 이미지 URL
+	            comments.add(commentDetails);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return comments;
+	}
     
   
     private JLabel createCreatedAtLabel(String createdAtText, int yPosition) {
         JLabel createdAtLabel = new JLabel("Created at: " + createdAtText);
         createdAtLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
         createdAtLabel.setBackground(new Color(245, 245, 245));
-        createdAtLabel.setBounds(10, yPosition, 350, 20);
+        createdAtLabel.setBounds(10, yPosition, 360, 20);
         createdAtLabel.setBorder(null);
         createdAtLabel.setOpaque(true);
         return createdAtLabel;
@@ -521,4 +648,56 @@ public class detailPost extends JFrame {
             e.printStackTrace();
         }
     }
+    
+    private ImageIcon getDefaultUserImageIcon(int diameter) {
+	    try {
+	        URL defaultImageUrl = getClass().getResource("/images/defaultUserImage.jpeg");
+	        if (defaultImageUrl != null) {
+	            return createCircularImageIcon(defaultImageUrl, diameter);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+
+
+	private ImageIcon createCircularImageIcon(URL url, int diameter) throws Exception {
+	    // URL에서 BufferedImage 로드
+	    BufferedImage originalImage = ImageIO.read(url);
+
+	    // 원본 이미지 크기 확인
+	    int originalWidth = originalImage.getWidth();
+	    int originalHeight = originalImage.getHeight();
+
+	    // 정사각형으로 변환
+	    int size = Math.min(originalWidth, originalHeight); // 최소 크기로 정사각형 자르기
+	    BufferedImage squareImage = originalImage.getSubimage(
+	        (originalWidth - size) / 2, 
+	        (originalHeight - size) / 2, 
+	        size, 
+	        size
+	    );
+
+	    // 고품질로 크기 조정
+	    BufferedImage resizedImage = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D g2d = resizedImage.createGraphics();
+	    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+	    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+	    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	    g2d.drawImage(squareImage, 0, 0, diameter, diameter, null);
+	    g2d.dispose();
+
+	    // 원형 마스크 적용
+	    BufferedImage circularImage = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D g2 = circularImage.createGraphics();
+	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+	    // 원형 클리핑
+	    g2.setClip(new java.awt.geom.Ellipse2D.Float(0, 0, diameter, diameter));
+	    g2.drawImage(resizedImage, 0, 0, diameter, diameter, null);
+	    g2.dispose();
+
+	    return new ImageIcon(circularImage);
+	}
 }
