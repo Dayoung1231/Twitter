@@ -26,6 +26,7 @@ public class detailPost extends JFrame {
 
     private final JPanel postPanel = new JPanel();
     
+    private String userID = "user7"; // 일단 설정
     private int postPosition; // 포스트 위치가 어디까지인지
 
     public detailPost(int postId) {
@@ -189,7 +190,7 @@ public class detailPost extends JFrame {
 
 	                        // 댓글 저장
 	                        CommentModel commentModel = new CommentModel();
-	                        boolean success = commentModel.addComment(postDetails[4], postId, comment, null);
+	                        boolean success = commentModel.addComment(userID, postId, comment, null);
 
 	                        if (success) {
 	                        	int newComment = Integer.parseInt(commentLabel.getText()) + 1; // 댓글 수 증가
@@ -238,7 +239,7 @@ public class detailPost extends JFrame {
 	            @Override
 	            public void actionPerformed(ActionEvent e) {
 	                LikeModel likeModel = new LikeModel();
-	                boolean success = likeModel.likePost(postDetails[4], postId);
+	                boolean success = likeModel.likePost(userID, postId);
 
 	                if (success) {
 	                    int newLikes = Integer.parseInt(likeLabel.getText()) + 1; // 좋아요 수 증가
@@ -283,7 +284,7 @@ public class detailPost extends JFrame {
 	            @Override
 	            public void actionPerformed(ActionEvent e) {
 	                RetweetModel retweetModel = new RetweetModel();
-	                boolean success = retweetModel.addRetweet(postDetails[4], postId); 
+	                boolean success = retweetModel.addRetweet(userID, postId); 
 
 	                if (success) {
 	                	int newRetweet = Integer.parseInt(retweetLabel.getText()) + 1; // 리트윗 수 증가
@@ -327,7 +328,7 @@ public class detailPost extends JFrame {
 	            @Override
 	            public void actionPerformed(ActionEvent e) {
 	                BookmarkModel bookmarkModel = new BookmarkModel();
-	                boolean success = bookmarkModel.addBookmark(postDetails[4], postId);
+	                boolean success = bookmarkModel.addBookmark(userID, postId);
 
 	                if (success) {
 	                	int newBookmark = Integer.parseInt(bookmarkLabel.getText()) + 1; // 북마크 수 증가

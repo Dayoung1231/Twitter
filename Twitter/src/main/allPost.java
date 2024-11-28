@@ -53,7 +53,7 @@ public class allPost {
 	private void initialize() {
 		
 		// 현재 로그인된 유저
-		String currentUser = "user1"; // 실제 로그인 로직에 따라 변경 필요
+		String currentUser = "user7"; // 실제 로그인 로직에 따라 변경 필요
 		
 	    frame = new JFrame();
 	    frame.setBounds(100, 100, 400, 600);

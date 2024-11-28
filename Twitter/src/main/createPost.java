@@ -28,7 +28,7 @@ public class createPost extends JFrame {
     private JTextField nameField;
     private JTextField idField;
     
-    private String userID = "user1"; // 일단 설정
+    private String userID = "user7"; // 일단 설정
     private JTextArea messageArea;    // 메시지 입력 필드
     private JTextField photoURLField; // 포토 URL 필드
 
@@ -81,7 +81,7 @@ public class createPost extends JFrame {
         postPanel.add(nameField);
         nameField.setColumns(10);
         // 데이터베이스에서 user_name 가져오기
-        String userName = loadUserName("user1"); // 일단 설정
+        String userName = loadUserName(userID); // 일단 설정
         if (userName != null) {
             nameField.setText(userName);
         } else {
