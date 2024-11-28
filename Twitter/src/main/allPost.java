@@ -282,6 +282,8 @@ public class allPost {
 	                        boolean success = commentModel.addComment(currentUser, Integer.parseInt(post[5]), comment, null); // userId: post[4], postId: post[5]
 
 	                        if (success) {
+	                        	int newComment = Integer.parseInt(commentLabel.getText()) + 1; // 댓글 수 증가
+	    	                    commentLabel.setText(String.valueOf(newComment)); // UI 업데이트
 	                            JOptionPane.showMessageDialog(commentFrame, "saved!", "성공", JOptionPane.INFORMATION_MESSAGE);
 	                            commentFrame.dispose();
 	                        } else {
@@ -375,6 +377,8 @@ public class allPost {
 	                boolean success = retweetModel.addRetweet(currentUser, Integer.parseInt(post[5])); // currentUser: user_id, post[5]: post_id
 
 	                if (success) {
+	                	int newRetweet = Integer.parseInt(retweetLabel.getText()) + 1; // 리트윗 수 증가
+	                    retweetLabel.setText(String.valueOf(newRetweet)); // UI 업데이트
 	                    JOptionPane.showMessageDialog(frame, "Successfully retweet!", "알림", JOptionPane.INFORMATION_MESSAGE);
 	                } else {
 	                    JOptionPane.showMessageDialog(frame, "Already retweet.", "알림", JOptionPane.WARNING_MESSAGE);
@@ -417,6 +421,8 @@ public class allPost {
 	                boolean success = bookmarkModel.addBookmark(currentUser, Integer.parseInt(post[5])); // currentUser: user_id, post[5]: post_id
 
 	                if (success) {
+	                	int newBookmark = Integer.parseInt(bookmarkLabel.getText()) + 1; // 북마크 수 증가
+	                    bookmarkLabel.setText(String.valueOf(newBookmark)); // UI 업데이트
 	                    JOptionPane.showMessageDialog(frame, "Successfully bookmarked", "알림", JOptionPane.INFORMATION_MESSAGE);
 	                } else {
 	                    JOptionPane.showMessageDialog(frame, "Already bookmarked.", "알림", JOptionPane.WARNING_MESSAGE);
