@@ -15,18 +15,7 @@ public class FollowModel {
      * @return 성공 여부 (true: 성공, false: 실패)
      */
     public boolean followUser(String userId, String followUserId) {
-        try (Connection con = DatabaseConnection.getConnection()) {
-        	// 유저 존재 여부 확인
-            String checkUserExistence = "SELECT user_id FROM user WHERE user_id = ?";
-            PreparedStatement checkUserStmt = con.prepareStatement(checkUserExistence);
-            checkUserStmt.setString(1, followUserId);
-            ResultSet userCheckResult = checkUserStmt.executeQuery();
-
-            if (!userCheckResult.next()) {
-                System.out.print("\nThe user you are trying to follow does not exist.");
-                return false; // 유저가 존재하지 않음
-            }
-            
+        try (Connection con = DatabaseConnection.getConnection()) {           
             // 팔로우 중복 확인
             String checkFollow = "SELECT f_id FROM following WHERE user_id = ? AND following_id = ?";
             PreparedStatement checkStmt = con.prepareStatement(checkFollow);
@@ -53,7 +42,7 @@ public class FollowModel {
             followerStmt.setString(2, userId);
             followerStmt.executeUpdate();
 
-            //System.out.println("\nFollowed user successfully!");
+            
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,16 +58,6 @@ public class FollowModel {
      */
     public boolean unfollowUser(String userId, String unfollowUserId) {
         try (Connection con = DatabaseConnection.getConnection()) {
-        	// 유저 존재 여부 확인
-            String checkUserExistence = "SELECT user_id FROM user WHERE user_id = ?";
-            PreparedStatement checkUserStmt = con.prepareStatement(checkUserExistence);
-            checkUserStmt.setString(1, unfollowUserId);
-            ResultSet userCheckResult = checkUserStmt.executeQuery();
-
-            if (!userCheckResult.next()) {
-                System.out.print("\nThe user you are trying to unfollow does not exist.");
-                return false; // 유저가 존재하지 않음
-            }
             
             // following 테이블에서 제거
             String removeFollowing = "DELETE FROM following WHERE user_id = ? AND following_id = ?";
@@ -95,10 +74,8 @@ public class FollowModel {
                 removeFollowerStmt.setString(2, userId);
                 removeFollowerStmt.executeUpdate();
 
-                System.out.println("Unfollowed user successfully!");
                 return true;
             } else {
-                System.out.println("You are not following this user.");
                 return false;
             }
         } catch (Exception e) {
@@ -106,6 +83,30 @@ public class FollowModel {
             return false;
         }
     }
+    
+    
+    /**
+     * 팔로우 여부 확인
+     * @param userId 현재 사용자 ID
+     * @param followUserId 팔로우 대상 사용자 ID
+     * @return 팔로우 여부 (true: 팔로우 중, false: 팔로우 중 아님)
+     */
+    public boolean isFollowing(String userId, String followUserId) {
+        try (Connection con = DatabaseConnection.getConnection()) {
+            String query = "SELECT f_id FROM following WHERE user_id = ? AND following_id = ?";
+            PreparedStatement stmt = con.prepareStatement(query);
+            stmt.setString(1, userId);
+            stmt.setString(2, followUserId);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next(); // 결과가 존재하면 팔로우 중
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    
+    
 
     /**
      * 팔로잉 목록 조회

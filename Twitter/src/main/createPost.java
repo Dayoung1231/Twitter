@@ -61,7 +61,7 @@ public class createPost extends JFrame {
         scrollPane.setBounds(0, 0, 386, 563); // 스크롤 패널 크기 설정
         createPost.this.getContentPane().add(scrollPane);
         
-        // 유저 사진 -> 클릭 시 프로필로 이동
+        // 유저 사진
         JButton userImageBtn = new JButton();
         userImageBtn.setBackground(new Color(255, 255, 255));
         userImageBtn.setBounds(12, 10, 55, 55);

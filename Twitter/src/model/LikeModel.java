@@ -65,7 +65,6 @@ public class LikeModel {
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next()) {
-                System.out.println("\nYou have already liked this comment.");
                 return false; // 중복 좋아요
             }
 
@@ -82,7 +81,6 @@ public class LikeModel {
             updateStmt.setInt(1, commentId);
             updateStmt.executeUpdate();
 
-            //System.out.println("Comment liked successfully!");
             return true;
         } catch (Exception e) {
             e.printStackTrace();

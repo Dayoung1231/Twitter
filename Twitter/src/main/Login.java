@@ -1,7 +1,5 @@
 package main;
 
-import model.UserModel;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -130,7 +128,7 @@ public class Login {
 	                        // 사용자 ID가 존재하면 비밀번호 확인
 	                        String storedPassword = rs.getString("pwd");
 	                        if (storedPassword.equals(passwordInput)) {
-	                            JOptionPane.showMessageDialog(null, "로그인 성공!");
+	                            JOptionPane.showMessageDialog(null, "Logged in!");
 	                            
 	                            // Pass user_id to allPost
 	                            EventQueue.invokeLater(() -> {
@@ -139,19 +137,19 @@ public class Login {
 	                            });
 	                            frame.dispose(); // 현재 화면 닫기
 	                        } else {
-	                            JOptionPane.showMessageDialog(null, "비밀번호가 일치하지 않습니다!");
+	                            JOptionPane.showMessageDialog(null, "incorrect password!");
 	                        }
 	                    } else {
-	                        JOptionPane.showMessageDialog(null, "ID가 존재하지 않습니다!");
+	                        JOptionPane.showMessageDialog(null, "ID does not exit!");
 	                    }
 
 	                    conn.close();
 	                } catch (Exception ex) {
 	                    ex.printStackTrace();
-	                    JOptionPane.showMessageDialog(null, "로그인 중 오류가 발생했습니다.");
+	                    JOptionPane.showMessageDialog(null, "Log in error");
 	                }
 	            } else {
-	                JOptionPane.showMessageDialog(null, "ID와 비밀번호를 입력하세요.");
+	                JOptionPane.showMessageDialog(null, "Enter ID/Password");
 	            }
 	        }
 	    });

@@ -1,22 +1,51 @@
 package main;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.sql.*;
-import java.awt.*;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.image.BufferedImage;
-import java.net.URL;
-import java.net.URI;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.net.URI;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
-import model.*;
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
-public class allPost extends JFrame {
+import model.BookmarkModel;
+import model.CommentModel;
+import model.LikeModel;
+import model.RetweetModel;
 
-	// private JFrame frame;
+public class otherUserProfile extends JFrame {
+
 
 	// MySQL 연결 정보
     private static final String DB_URL = "jdbc:mysql://localhost:3306/Twitter";
@@ -24,34 +53,34 @@ public class allPost extends JFrame {
     private static final String DB_PASSWORD = "ekdud0412?";
     
     private static String currentUser;
-	
+    private static String otherUser;
+    private JPanel containerPanel;
 
 
-	public allPost(String currentUser) {
-		// 현재 로그인된 유저
-		this.currentUser = currentUser;
-		initialize();
+	public otherUserProfile(String userId, String otherId) {
+		this.currentUser = userId;
+		this.otherUser = otherId;
+		initialize(currentUser, otherUser);
 	}
 
 
-	private void initialize() {
-		
-		
-		setTitle("All Posts");
+	
+	private void initialize(String currentUser, String otherUser) {
 	    setBounds(100, 100, 400, 600);
 	    setLocationRelativeTo(null);
 	    setResizable(false);
 	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    getContentPane().setBackground(Color.WHITE);
 	    getContentPane().setLayout(null);
-
+	    
+	    
 	    
 	    // 상단 패널 생성
 	    JPanel topPanel = new JPanel();
 	    topPanel.setBackground(new Color(106, 181, 249)); // 트위터와 비슷한 파란색
 	    topPanel.setBounds(0, 0, 390, 60);
 	    topPanel.setLayout(null);
-	    getContentPane().add(topPanel);
+	    otherUserProfile.this.getContentPane().add(topPanel);
 
 
 	    // 트위터 아이콘 로드
@@ -70,100 +99,36 @@ public class allPost extends JFrame {
 	    }
 
 	    // 텍스트 라벨 생성
-	    JLabel textLabel = new JLabel("Tweet");
+	    String otherUserName = loadUserName(otherUser); // otherUser ID로 이름 가져오기
+	    JLabel textLabel = new JLabel(otherUserName + "'s profile");
 	    textLabel.setFont(new Font("Arial", Font.BOLD, 20));
 	    textLabel.setForeground(Color.WHITE);
-	    textLabel.setBounds(60, 15, 99, 30);
+	    textLabel.setBounds(60, 15, 200, 30);
 	    topPanel.add(textLabel);
 	    
 	    
-	    // Create 버튼
-        JButton createButton = new JButton("create");
-        createButton.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-        createButton.setBounds(290, 20, 80, 26);
-        createButton.setForeground(new Color(106, 181, 249)); // 글자 색상: 흰색
-        createButton.setBackground(Color.WHITE); // 배경 색상: 파란색
-        createButton.setFocusPainted(false); // 클릭 시 포커스 효과 제거
-        createButton.setBorderPainted(false); // 기본 테두리 제거
-        createButton.setOpaque(false); // 불투명 효과 제거
-        createButton.setContentAreaFilled(false); // 버튼 배경 투명 처리
-        topPanel.add(createButton);
+	    // back 버튼
+        JButton backBtn = new JButton("Back");
+        backBtn.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        backBtn.setBounds(290, 20, 80, 26);
+        backBtn.setForeground(new Color(106, 181, 249)); // 글자 색상: 흰색
+        backBtn.setBackground(Color.WHITE); // 배경 색상: 파란색
+        backBtn.setFocusPainted(false); // 클릭 시 포커스 효과 제거
+        backBtn.setBorderPainted(false); // 기본 테두리 제거
+        backBtn.setOpaque(false); // 불투명 효과 제거
+        backBtn.setContentAreaFilled(false); // 버튼 배경 투명 처리
+        topPanel.add(backBtn);
         
-        // Create 버튼 클릭 이벤트
-        createButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                // createPost 클래스의 프레임 호출
-                SwingUtilities.invokeLater(() -> {
-                    try {
-                        createPost createPostWindow = new createPost(currentUser);
-                        createPostWindow.setVisible(true);
-                        allPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                });
-            }
-        });
-        
-        // 둥근 버튼 모양 만들기
-        createButton.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
-            @Override
-            public void paint(Graphics g, JComponent c) {
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                // 버튼 배경 채우기
-                g2.setColor(createButton.getBackground());
-                g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 30, 30); // 둥근 사각형: 30px radius
-
-                super.paint(g, c);
-            }
-        });
-	   
-	    
-	    // 하단 패널 생성
-	    JPanel bottomPanel = new JPanel();
-	    bottomPanel.setBackground(new Color(106, 181, 249));
-	    bottomPanel.setBounds(0, 519, 390, 44); // 하단에 고정
-	    bottomPanel.setLayout(new GridLayout(1, 3)); // 버튼을 균등하게 배치
-	    getContentPane().add(bottomPanel);
-
-	    // 프로필 버튼
-	    JButton profileButton = new JButton("Profile");
-	    profileButton.setFont(new Font("맑은 고딕", Font.BOLD, 12));
-	    profileButton.setForeground(Color.WHITE);
-	    profileButton.setFocusPainted(false);
-	    profileButton.setBackground(new Color(106, 181, 249)); // 밝은 파란색
-	    bottomPanel.add(profileButton);
-
-	    // 홈 버튼
-	    JButton homeButton = new JButton("Home");
-	    homeButton.setFont(new Font("맑은 고딕", Font.BOLD, 12));
-	    homeButton.setForeground(Color.WHITE);
-	    homeButton.setFocusPainted(false);
-	    homeButton.setBackground(new Color(106, 181, 249));
-	    bottomPanel.add(homeButton);
-
-	    // DM 버튼
-	    JButton dmButton = new JButton("DM");
-	    dmButton.setFont(new Font("맑은 고딕", Font.BOLD, 12));
-	    dmButton.setForeground(Color.WHITE);
-	    dmButton.setFocusPainted(false);
-	    dmButton.setBackground(new Color(106, 181, 249));
-	    bottomPanel.add(dmButton);
-	    
-	    // 프로필 버튼 클릭 이벤트
-	    profileButton.addActionListener(new ActionListener() {
+        // back 버튼 클릭 이벤트
+	    backBtn.addActionListener(new ActionListener() {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
-	        	// Profile 클래스의 프레임 호출
+	        	// allPost 클래스의 프레임 호출
                 SwingUtilities.invokeLater(() -> {
                     try {
                         Profile profileWindow = new Profile(currentUser);
                         profileWindow.setVisible(true);
-                        allPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+                        otherUserProfile.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -171,18 +136,152 @@ public class allPost extends JFrame {
 	        }
 	    });
 	    
+        // 둥근 버튼 모양 만들기
+        backBtn.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
+            @Override
+            public void paint(Graphics g, JComponent c) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // 버튼 배경 채우기
+                g2.setColor(backBtn.getBackground());
+                g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 30, 30); // 둥근 사각형: 30px radius
+
+                super.paint(g, c);
+            }
+        });
+        
+	    
+
+        // 하단 패널 생성
+	    JPanel bottomPanel = new JPanel();
+	    bottomPanel.setBackground(new Color(106, 181, 249));
+	    bottomPanel.setBounds(0, 520, 390, 44); // 하단에 고정
+	    bottomPanel.setLayout(new GridLayout(1, 3)); // 버튼을 균등하게 배치
+	    otherUserProfile.this.getContentPane().add(bottomPanel);
+
+	    
+	    // 프로필 패널 생성
+	    JPanel profilePanel = new JPanel();
+	    profilePanel.setBackground(Color.white);
+	    profilePanel.setBounds(0, 60, 390, 160);
+	    profilePanel.setLayout(null);
+	    otherUserProfile.this.getContentPane().add(profilePanel);
+	    
+	    
+	    // 유저 사진
+        JButton userImageBtn = new JButton();
+        userImageBtn.setBackground(new Color(255, 255, 255));
+        userImageBtn.setBounds(12, 10, 70, 70);
+        userImageBtn.setContentAreaFilled(false); // 버튼 배경 투명
+        userImageBtn.setBorderPainted(false);    // 버튼 테두리 제거
+        userImageBtn.setFocusPainted(false);     // 버튼 포커스 표시 제거
+        userImageBtn.setOpaque(false);           // 불투명 설정 해제
+        profilePanel.add(userImageBtn);
+        // 유저 사진 로드 함수 호출
+        loadUserImage(userImageBtn, otherUser);
+        
+        
+        // 유저 이름
+        JTextField nameField = new JTextField();
+        nameField.setBounds(100, 25, 180, 27);
+        nameField.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+        nameField.setBorder(null);
+        profilePanel.add(nameField);
+        nameField.setColumns(10);
+        // 데이터베이스에서 user_name 가져오기
+        String userName = loadUserName(otherUser);
+        if (userName != null) {
+            nameField.setText(userName);
+        } else {
+            nameField.setText("Unknown User");
+        }
+        
+        
+        // 유저 아이디
+        JTextField idField = new JTextField();
+        idField.setText("@" + otherUser);
+        idField.setBounds(100, 54, 180, 19);
+        idField.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
+        idField.setBorder(null);
+        profilePanel.add(idField);
+        idField.setColumns(10);
+	    
+	    // intro
+        JLabel introLabel = new JLabel();
+        introLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+        introLabel.setBackground(new Color(245, 245, 245));
+        introLabel.setBounds(18, 90, 350, 20); // 위치와 크기 설정
+        profilePanel.add(introLabel);
+
+        // 데이터베이스에서 intro 가져오기
+        String intro = loadUserIntro(otherUser);
+        if (intro != null && !intro.isEmpty()) {
+            introLabel.setText(intro); // intro 내용 설정
+        } else {
+            introLabel.setText("no bio"); // intro가 null이거나 비어있을 경우 기본값 설정
+        }
+	    
+        
+        // following 버튼
+        JButton followingBtn = new JButton();
+        followingBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
+        followingBtn.setBounds(0, 120, 100, 26);
+        followingBtn.setForeground(new Color(100, 100, 100)); // 글자 색상
+        followingBtn.setBackground(Color.WHITE);
+        followingBtn.setFocusPainted(false); // 클릭 시 포커스 효과 제거
+        followingBtn.setBorderPainted(false); // 기본 테두리 제거
+        followingBtn.setContentAreaFilled(false); // 버튼 배경 투명 처리
+        profilePanel.add(followingBtn);
+
+        // following 수 가져오기
+        int followingCount = getFollowingCount(otherUser);
+        followingBtn.setText(followingCount + " Following");
+        
+
+        // followers 버튼
+        JButton followersBtn = new JButton();
+        followersBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
+        followersBtn.setBounds(80, 120, 100, 26);
+        followersBtn.setForeground(new Color(100, 100, 100)); // 글자 색상
+        followersBtn.setBackground(Color.WHITE);
+        followersBtn.setFocusPainted(false); // 클릭 시 포커스 효과 제거
+        followersBtn.setBorderPainted(false); // 기본 테두리 제거
+        followersBtn.setContentAreaFilled(false); // 버튼 배경 투명 처리
+        profilePanel.add(followersBtn);
+
+        // followers 수 가져오기
+        int followersCount = getFollowersCount(otherUser);
+        followersBtn.setText(followersCount + " Followers");
+
+	    
+	    // 내 포스트 목록 패널 생성
+	    JPanel listPanel = new JPanel();
+	    listPanel.setBackground(Color.WHITE);
+	    listPanel.setBounds(0, 220, 390, 30);
+	    otherUserProfile.this.getContentPane().add(listPanel);
+	    listPanel.setLayout(null);
+	    
+	    // 포스트 목록 버튼
+	    JButton postBtn = new JButton("Posts");
+	    postBtn.setBounds(0, 5, 65, 25);
+	    postBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
+	    postBtn.setForeground(Color.BLACK);
+	    postBtn.setFocusPainted(false);
+	    postBtn.setBackground(new Color(245, 245, 245));
+	    postBtn.setHorizontalAlignment(SwingConstants.LEFT);
+	    listPanel.add(postBtn);
 	    
 	    
 	    // 모든 포스트를 담을 컨테이너 패널
-	    JPanel containerPanel = new JPanel();
+	    containerPanel = new JPanel();
 	    containerPanel.setBackground(new Color(255, 255, 255));
-	    //containerPanel.setLayout(null); // 자유 배치
 	    containerPanel.setLayout(new BoxLayout(containerPanel, BoxLayout.Y_AXIS)); // BoxLayout으로 설정하여 자동 크기 조정containerPanel.setLayout(new BoxLayout(containerPanel, BoxLayout.Y_AXIS)); // BoxLayout으로 설정하여 자동 크기 조정
 	    containerPanel.setPreferredSize(new Dimension(380, 250)); // 초기 크기 설정
 
 	    // 스크롤 패널
 	    JScrollPane scrollPane = new JScrollPane(containerPanel);
-	    scrollPane.setBounds(0, 60, 386, 460);
+	    scrollPane.setBounds(0, 250, 386, 270);
 	    scrollPane.getVerticalScrollBar().setUnitIncrement(16); // 스크롤 속도 조정
 	    // 세로 스크롤바 스타일 적용
 	    scrollPane.getVerticalScrollBar().setUI(new ScrollBarUI());
@@ -191,10 +290,10 @@ public class allPost extends JFrame {
 	    scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 0));
 	    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); // 가로 스크롤 비활성화
 	    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); // 세로 스크롤 활성화
-	    getContentPane().add(scrollPane);
+	    otherUserProfile.this.getContentPane().add(scrollPane);
 
 	    // 모든 포스트 가져오기
-	    java.util.List<String[]> allPosts = loadAllPostsWithImages();
+	    java.util.List<String[]> allPosts = loadMyPostsAndRetweets(otherUser);
 
 	    // 각 포스트 정보를 표시할 패널 생성 및 추가
 	    int yOffset = 10; // 첫 포스트 간격
@@ -208,13 +307,13 @@ public class allPost extends JFrame {
 
 
 	        // 유저 사진 표시
-	        JButton userImageBtn = new JButton();
-	        userImageBtn.setBounds(10, 10, 50, 50);
-	        userImageBtn.setContentAreaFilled(false);
-	        userImageBtn.setBorderPainted(false);
-	        userImageBtn.setFocusPainted(false);
-	        userImageBtn.setOpaque(false);
-	        postPanel.add(userImageBtn);
+	        JButton userImageButton = new JButton();
+	        userImageButton.setBounds(10, 10, 50, 50);
+	        userImageButton.setContentAreaFilled(false);
+	        userImageButton.setBorderPainted(false);
+	        userImageButton.setFocusPainted(false);
+	        userImageButton.setOpaque(false);
+	        postPanel.add(userImageButton);
 
 	        // 유저 사진 로드
 	        if (post[3] != null && !post[3].isEmpty()) {
@@ -222,13 +321,13 @@ public class allPost extends JFrame {
 	                URI uri = new URI(post[3]);
 	                URL url = uri.toURL();
 	                ImageIcon circularIcon = createCircularImageIcon(url, 50); // 지름 50px로 생성
-	                userImageBtn.setIcon(circularIcon);
+	                userImageButton.setIcon(circularIcon);
 	            } catch (Exception e) {
 	                e.printStackTrace();
-	                userImageBtn.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
+	                userImageButton.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
 	            }
 	        } else {
-	            userImageBtn.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
+	            userImageButton.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
 	        }
 
 	        
@@ -298,16 +397,16 @@ public class allPost extends JFrame {
 	                commentFrame.setBounds(100, 100, 300, 200);
 	                commentFrame.setLocationRelativeTo(null);
 	                commentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-	                commentFrame.setLayout(new FlowLayout());
+	                commentFrame.getContentPane().setLayout(new FlowLayout());
 
 	                // 입력 필드 생성
 	                JTextField commentField = new JTextField(20);
 	                JLabel messageLabel = new JLabel("Comment:");
 	                JButton submitButton = new JButton("save");
 
-	                commentFrame.add(messageLabel);
-	                commentFrame.add(commentField);
-	                commentFrame.add(submitButton);
+	                commentFrame.getContentPane().add(messageLabel);
+	                commentFrame.getContentPane().add(commentField);
+	                commentFrame.getContentPane().add(submitButton);
 
 	                commentFrame.setVisible(true);
 
@@ -377,9 +476,9 @@ public class allPost extends JFrame {
 	                if (success) {
 	                    int newLikes = Integer.parseInt(likeLabel.getText()) + 1; // 좋아요 수 증가
 	                    likeLabel.setText(String.valueOf(newLikes)); // UI 업데이트
-	                    JOptionPane.showMessageDialog(allPost.this, "Successfully liked!", "알림", JOptionPane.INFORMATION_MESSAGE);
+	                    JOptionPane.showMessageDialog(otherUserProfile.this, "Successfully liked!", "알림", JOptionPane.INFORMATION_MESSAGE);
 	                } else {
-	                    JOptionPane.showMessageDialog(allPost.this, "Already liked.", "알림", JOptionPane.WARNING_MESSAGE);
+	                    JOptionPane.showMessageDialog(otherUserProfile.this, "Already liked.", "알림", JOptionPane.WARNING_MESSAGE);
 	                }
 	            }
 	        });
@@ -423,9 +522,9 @@ public class allPost extends JFrame {
 	                if (success) {
 	                	int newRetweet = Integer.parseInt(retweetLabel.getText()) + 1; // 리트윗 수 증가
 	                    retweetLabel.setText(String.valueOf(newRetweet)); // UI 업데이트
-	                    JOptionPane.showMessageDialog(allPost.this, "Successfully retweet!", "알림", JOptionPane.INFORMATION_MESSAGE);
+	                    JOptionPane.showMessageDialog(otherUserProfile.this, "Successfully retweet!", "알림", JOptionPane.INFORMATION_MESSAGE);
 	                } else {
-	                    JOptionPane.showMessageDialog(allPost.this, "Already retweet.", "알림", JOptionPane.WARNING_MESSAGE);
+	                    JOptionPane.showMessageDialog(otherUserProfile.this, "Already retweet.", "알림", JOptionPane.WARNING_MESSAGE);
 	                }
 	            }
 	        });
@@ -467,9 +566,9 @@ public class allPost extends JFrame {
 	                if (success) {
 	                	int newBookmark = Integer.parseInt(bookmarkLabel.getText()) + 1; // 북마크 수 증가
 	                    bookmarkLabel.setText(String.valueOf(newBookmark)); // UI 업데이트
-	                    JOptionPane.showMessageDialog(allPost.this, "Successfully bookmarked", "알림", JOptionPane.INFORMATION_MESSAGE);
+	                    JOptionPane.showMessageDialog(otherUserProfile.this, "Successfully bookmarked", "알림", JOptionPane.INFORMATION_MESSAGE);
 	                } else {
-	                    JOptionPane.showMessageDialog(allPost.this, "Already bookmarked.", "알림", JOptionPane.WARNING_MESSAGE);
+	                    JOptionPane.showMessageDialog(otherUserProfile.this, "Already bookmarked.", "알림", JOptionPane.WARNING_MESSAGE);
 	                }
 	            }
 	        });
@@ -497,7 +596,7 @@ public class allPost extends JFrame {
 	                    try {
 	                        detailPost detailWindow = new detailPost(postId, currentUser); // postId를 전달
 	                        detailWindow.setVisible(true);
-	                        allPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+	                        otherUserProfile.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
 	                    } catch (Exception ex) {
 	                        ex.printStackTrace();
 	                    }
@@ -520,23 +619,37 @@ public class allPost extends JFrame {
 	    // 스크롤바 위치 초기화 (맨 위로 설정)
 	    SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
 	}
-
-	private java.util.List<String[]> loadAllPostsWithImages() {
-	    java.util.List<String[]> posts = new ArrayList<>();
+	
+	private java.util.List<String[]> loadMyPostsAndRetweets(String otherUser) {
+		java.util.List<String[]> posts = new ArrayList<>();
 
 	    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-	        // 모든 포스트와 유저 이미지를 가져오는 SQL 쿼리
+	        // 현재 유저의 모든 포스트와 리트윗한 포스트를 가져오는 SQL 쿼리
 	        String query = "SELECT u.user_name, p.message, p.created_at, u.image_url, u.user_id, p.post_id, p.num_of_likes, " +
 	                "(SELECT COUNT(*) FROM COMMENT WHERE post_id = p.post_id) AS comment_count, " +
 	                "(SELECT COUNT(*) FROM RETWEET WHERE post_id = p.post_id) AS retweet_count, " +
 	                "(SELECT COUNT(*) FROM BOOKMARK WHERE post_id = p.post_id) AS bookmark_count " +
-	                "FROM POSTS p JOIN USER u ON p.writer_id = u.user_id " +
-	                "ORDER BY p.created_at ASC";
+	                "FROM POSTS p " +
+	                "JOIN USER u ON p.writer_id = u.user_id " +
+	                "WHERE p.writer_id = ? " +
+	                "UNION " +
+	                "SELECT u.user_name, p.message, p.created_at, u.image_url, u.user_id, p.post_id, p.num_of_likes, " +
+	                "(SELECT COUNT(*) FROM COMMENT WHERE post_id = p.post_id) AS comment_count, " +
+	                "(SELECT COUNT(*) FROM RETWEET WHERE post_id = p.post_id) AS retweet_count, " +
+	                "(SELECT COUNT(*) FROM BOOKMARK WHERE post_id = p.post_id) AS bookmark_count " +
+	                "FROM RETWEET r " +
+	                "JOIN POSTS p ON r.post_id = p.post_id " +
+	                "JOIN USER u ON p.writer_id = u.user_id " +
+	                "WHERE r.user_id = ? " +
+	                "ORDER BY created_at ASC";
+
 	        PreparedStatement pstmt = conn.prepareStatement(query);
+	        pstmt.setString(1, currentUser);
+	        pstmt.setString(2, currentUser);
 
 	        ResultSet rs = pstmt.executeQuery();
 	        while (rs.next()) {
-	            String[] postDetails = new String[10]; // 배열 크기를 10으로 확장
+	            String[] postDetails = new String[10]; // 배열 크기를 10으로 유지
 	            postDetails[0] = rs.getString("user_name"); // 유저 이름
 	            postDetails[1] = rs.getString("message");   // 메시지
 	            postDetails[2] = rs.getTimestamp("created_at").toString(); // 생성일
@@ -555,6 +668,7 @@ public class allPost extends JFrame {
 
 	    return posts;
 	}
+
 
 
 
@@ -609,5 +723,175 @@ public class allPost extends JFrame {
 
 	    return new ImageIcon(circularImage);
 	}
+
+	
+	private String loadUserName(String userId) {
+	    String userName = null;
+
+	    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+	        // SQL 쿼리: user_id로 user_name 가져오기
+	        String query = "SELECT user_name FROM User WHERE user_id = ?";
+	        PreparedStatement pstmt = conn.prepareStatement(query);
+	        pstmt.setString(1, userId);
+
+	        ResultSet rs = pstmt.executeQuery();
+	        if (rs.next()) {
+	            userName = rs.getString("user_name");
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return userName;
+	}
+	
+	
+	private void loadUserImage(JButton button, String userId) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        	
+            String query = "SELECT image_url FROM User WHERE user_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, userId); // user_id 조건 설정
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                String imageUrl = rs.getString("image_url");
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    // URL 대신 URI 사용
+                    URI uri = new URI(imageUrl);
+                    URL url = uri.toURL();
+                    ImageIcon circularIcon = createCircularImageIcon(url, 70, 70);
+                    button.setIcon(circularIcon); // 동그란 이미지 설정
+                } else {
+                    // 기본 이미지 설정
+                    setDefaultUserImage(button);
+                }
+            } else {
+                // 기본 이미지 설정 (유저 ID가 없을 때)
+                setDefaultUserImage(button);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 예외가 발생한 경우에도 기본 이미지 설정
+            setDefaultUserImage(button);
+        }
+    }
+	
+	
+	private ImageIcon createCircularImageIcon(URL url, int width, int height) throws Exception {
+		// URL에서 BufferedImage 로드
+	    BufferedImage originalImage = ImageIO.read(url);
+
+	    // 원본 이미지 크기 확인
+	    int originalWidth = originalImage.getWidth();
+	    int originalHeight = originalImage.getHeight();
+
+	    // 정사각형으로 변환
+	    int size = Math.min(originalWidth, originalHeight); // 최소 크기로 맞춤
+	    BufferedImage squareImage = originalImage.getSubimage(
+	        (originalWidth - size) / 2, 
+	        (originalHeight - size) / 2, 
+	        size, 
+	        size
+	    );
+
+	    // 고품질로 크기 조정
+	    BufferedImage scaledImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D g2d = scaledImage.createGraphics();
+	    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+	    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+	    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	    g2d.drawImage(squareImage, 0, 0, width, height, null);
+	    g2d.dispose();
+
+	    // 원형으로 처리
+	    BufferedImage circularImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D g2 = circularImage.createGraphics();
+	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	    g2.setClip(new java.awt.geom.Ellipse2D.Float(0, 0, width, height));
+	    g2.drawImage(scaledImage, 0, 0, width, height, null);
+	    g2.dispose();
+	    
+        return new ImageIcon(circularImage);
+    }
+
+    private void setDefaultUserImage(JButton button) {
+        try {
+        	
+            // 기본 이미지 로드 (로컬 리소스)
+            URL defaultImageUrl = getClass().getResource("/images/defaultUserImage.jpeg");
+            
+            if (defaultImageUrl != null) {
+                ImageIcon defaultIcon = createCircularImageIcon(defaultImageUrl, 70, 70);
+                button.setIcon(defaultIcon);
+            } else {
+                System.err.println("Default image not found!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private String loadUserIntro(String userId) {
+        String intro = null;
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            // SQL 쿼리: user_id로 intro 가져오기
+            String query = "SELECT intro FROM User WHERE user_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, userId);
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                intro = rs.getString("intro");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return intro;
+    }
+    
+    
+    private int getFollowingCount(String userId) {
+        int count = 0;
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            // following 수를 가져오는 SQL 쿼리
+            String query = "SELECT COUNT(*) AS count FROM FOLLOWING WHERE user_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, userId);
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return count;
+    }
+
+    private int getFollowersCount(String userId) {
+        int count = 0;
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            // followers 수를 가져오는 SQL 쿼리
+            String query = "SELECT COUNT(*) AS count FROM FOLLOWER WHERE user_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, userId);
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return count;
+    }
+
 
 }

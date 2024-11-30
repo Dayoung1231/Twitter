@@ -68,8 +68,24 @@ public class UserModel {
     }
 
 
-    
-    
+    public boolean edit(String id, String userName, String phoneNum, String intro, String image) {
+        try (Connection con = DatabaseConnection.getConnection()) {
+
+            // 사용자 정보 수정
+            String registerUser = "UPDATE user SET user_name = ?, phone_num = ?, intro = ?, image_url = ? WHERE user_id = ?";
+            PreparedStatement registerStmt = con.prepareStatement(registerUser);
+            registerStmt.setString(1, userName);
+            registerStmt.setString(2, phoneNum);
+            registerStmt.setString(3, intro);
+            registerStmt.setString(4, image);
+            registerStmt.setString(5, id);
+            registerStmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     
     
     
