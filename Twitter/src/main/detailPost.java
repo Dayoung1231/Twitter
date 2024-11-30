@@ -26,10 +26,11 @@ public class detailPost extends JFrame {
 
     private final JPanel postPanel = new JPanel();
     
-    private String userID = "user7"; // 일단 설정
+    private String userID;
     private int postPosition; // 포스트 위치가 어디까지인지
 
-    public detailPost(int postId) {
+    public detailPost(int postId, String currentUser) {
+    	this.userID = currentUser;
         initialize(postId);
     }
 
@@ -373,7 +374,7 @@ public class detailPost extends JFrame {
 	                // allPost 클래스의 프레임 호출
 	                SwingUtilities.invokeLater(() -> {
 	                    try {
-	                        allPost allPostWindow = new allPost();
+	                        allPost allPostWindow = new allPost(userID);
 	                        allPostWindow.setVisible(true);
 	                        detailPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
 	                    } catch (Exception ex) {
@@ -413,7 +414,7 @@ public class detailPost extends JFrame {
 
 	    // 각 댓글 정보를 표시할 패널 생성 및 추가
 	    int yOffset = postPosition; // 첫 댓글 간격
-	    int panelHeight = 130; // 각 패널의 높이
+	    int panelHeight = 150; // 각 패널의 높이
 	    for (String[] comment : allComments) {
 	        JPanel commentPanel = new JPanel();
 	        commentPanel.setLayout(null);
@@ -477,7 +478,140 @@ public class detailPost extends JFrame {
 	        createdAtField.setBounds(70, 104, 280, 20);
 	        commentPanel.add(createdAtField);
 
+	        
+	        
 
+	        // 모든 child 댓글 가져오기
+	        java.util.List<String[]> allChildComments = loadAllChildComments(comment[0]);
+
+	        // 첫 번째 child 댓글 가져오기 (리스트가 비어 있지 않은 경우)
+	        String[] childComment = allChildComments.isEmpty() ? null : allChildComments.get(0);
+
+	        // child 댓글 버튼
+	        JButton childCommentButton = new JButton();
+	        childCommentButton.setBounds(70, 125, 20, 20); // 크기를 아이콘에 맞게 조정
+	        childCommentButton.setContentAreaFilled(false); // 배경 제거
+	        childCommentButton.setFocusPainted(false); // 포커스 테두리 제거
+	        childCommentButton.setBorderPainted(false); // 버튼 테두리 제거
+	        childCommentButton.setOpaque(false); // 불투명도 제거
+	        commentPanel.add(childCommentButton);
+
+	        // child 댓글 수 라벨
+	        String childCommentCount = childComment != null ? childComment[7] : "0"; // child 댓글 수 표시
+	        JLabel childCommentLabel = new JLabel(childCommentCount);
+	        childCommentLabel.setBounds(100, 125, 50, 20);
+	        childCommentLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+	        childCommentLabel.setBackground(new Color(245, 245, 245));
+	        commentPanel.add(childCommentLabel);
+
+	        
+	        // 댓글 아이콘 설정
+	        try {
+	            URL childCommentIconUrl = getClass().getResource("/images/Comment.png");
+	            if (childCommentIconUrl != null) {
+	                ImageIcon childCommentIcon = new ImageIcon(childCommentIconUrl);
+	                Image scaledCommentIcon = childCommentIcon.getImage().getScaledInstance(19, 19, Image.SCALE_SMOOTH);
+	                childCommentButton.setIcon(new ImageIcon(scaledCommentIcon));
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	        
+	        childCommentButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                // 댓글 입력 창 생성
+	                JFrame commentFrame = new JFrame("Child Comment");
+	                commentFrame.setBounds(100, 100, 300, 200);
+	                commentFrame.setLocationRelativeTo(null);
+	                commentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+	                commentFrame.setLayout(new FlowLayout());
+
+	                // 입력 필드 생성
+	                JTextField commentField = new JTextField(20);
+	                JLabel messageLabel = new JLabel("Child Comment:");
+	                JButton submitButton = new JButton("save");
+
+	                commentFrame.add(messageLabel);
+	                commentFrame.add(commentField);
+	                commentFrame.add(submitButton);
+
+	                commentFrame.setVisible(true);
+
+	                // child 댓글 작성 버튼 클릭 이벤트
+	                submitButton.addActionListener(new ActionListener() {
+	                    @Override
+	                    public void actionPerformed(ActionEvent ev) {
+	                        String comment = commentField.getText();
+	                        if (comment.isEmpty()) {
+	                            JOptionPane.showMessageDialog(commentFrame, "Enter the child comment!", "경고", JOptionPane.WARNING_MESSAGE);
+	                            return;
+	                        }
+
+	                        // child 댓글 저장
+	                        CommentModel commentModel = new CommentModel();
+	                        boolean success = commentModel.addComment(userID, Integer.parseInt(childComment[5]), comment, null); // userId: post[4], postId: post[5]
+
+	                        if (success) {
+	                        	int newComment = Integer.parseInt(childCommentLabel.getText()) + 1; // child 댓글 수 증가
+	    	                    childCommentLabel.setText(String.valueOf(newComment)); // UI 업데이트
+	                            JOptionPane.showMessageDialog(commentFrame, "saved!", "성공", JOptionPane.INFORMATION_MESSAGE);
+	                            commentFrame.dispose();
+	                        } else {
+	                            JOptionPane.showMessageDialog(commentFrame, "failed.", "실패", JOptionPane.ERROR_MESSAGE);
+	                        }
+	                    }
+	                });
+	            }
+	        });
+
+	        
+	        // 좋아요 버튼
+	        JButton likeButton = new JButton();
+	        likeButton.setBounds(140, 125, 20, 20); // 크기를 아이콘에 맞게 조정
+	        likeButton.setFont(new Font("맑은 고딕", Font.PLAIN, 8));
+	        likeButton.setContentAreaFilled(false); // 버튼 배경 제거
+	        likeButton.setFocusPainted(false); // 포커스 테두리 제거
+	        likeButton.setBorderPainted(false); // 버튼 테두리 제거
+	        likeButton.setOpaque(false); // 버튼 불투명도 제거
+	        commentPanel.add(likeButton);
+	        
+	        JLabel likeLabel = new JLabel(comment[6]); // 좋아요 수 표시
+	        likeLabel.setBounds(170, 125, 50, 20);
+	        likeLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+	        likeLabel.setBackground(new Color(245, 245, 245));
+	        commentPanel.add(likeLabel);
+
+	        // 좋아요 아이콘 설정
+	        try {
+	            URL likeIconUrl = getClass().getResource("/images/Likes.png");
+	            if (likeIconUrl != null) {
+	                ImageIcon likeIcon = new ImageIcon(likeIconUrl);
+	                Image scaledIcon = likeIcon.getImage().getScaledInstance(17, 17, Image.SCALE_SMOOTH);
+	                likeButton.setIcon(new ImageIcon(scaledIcon));
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+
+	        likeButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                LikeModel likeModel = new LikeModel();
+	                boolean success = likeModel.likePost(userID, Integer.parseInt(comment[0])); // currentUser: user_id, post[5]: post_id
+
+	                if (success) {
+	                    int newLikes = Integer.parseInt(likeLabel.getText()) + 1; // 좋아요 수 증가
+	                    likeLabel.setText(String.valueOf(newLikes)); // UI 업데이트
+	                    JOptionPane.showMessageDialog(detailPost.this, "Successfully liked!", "알림", JOptionPane.INFORMATION_MESSAGE);
+	                } else {
+	                    JOptionPane.showMessageDialog(detailPost.this, "Already liked.", "알림", JOptionPane.WARNING_MESSAGE);
+	                }
+	            }
+	        });
+	        
+	        
 	        postPanel.add(commentPanel);
 
 	        // 다음 패널의 Y축 위치 계산
@@ -492,6 +626,47 @@ public class detailPost extends JFrame {
     }
     
 
+    
+    private java.util.List<String[]> loadAllChildComments(String commentId) {
+        java.util.List<String[]> childCommentDetailsList = new ArrayList<>();
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            // SQL 쿼리: 해당 comment의 모든 child comment와 작성자 정보를 가져오기
+            String query = "SELECT cc.cmt_id, cc.message, cc.user_id, cc.created_at, " +
+                           "u.user_name, u.image_url, " +
+                           "IFNULL((SELECT COUNT(*) FROM COMMENT_LIKE cl WHERE cl.cmt_id = cc.cmt_id), 0) AS num_of_likes, " +
+                           "IFNULL((SELECT COUNT(*) FROM CHILD_COMMENT ccc WHERE ccc.parent_cmt_id = cc.cmt_id), 0) AS num_of_child_comments " +
+                           "FROM CHILD_COMMENT cc " +
+                           "JOIN USER u ON cc.user_id = u.user_id " +
+                           "WHERE cc.parent_cmt_id = ? " +
+                           "ORDER BY cc.created_at ASC";
+
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, commentId); // parent comment ID로 필터링
+
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String[] childCommentDetails = new String[8];
+                childCommentDetails[0] = rs.getString("cmt_id");               // Child comment ID
+                childCommentDetails[1] = rs.getString("message");              // Child comment 내용
+                childCommentDetails[2] = rs.getString("user_id");              // 작성자 ID
+                childCommentDetails[3] = rs.getTimestamp("created_at").toString(); // 생성 날짜
+                childCommentDetails[4] = rs.getString("user_name");            // 작성자 이름
+                childCommentDetails[5] = rs.getString("image_url");            // 작성자 프로필 이미지 URL
+                childCommentDetails[6] = rs.getString("num_of_likes");         // 좋아요 수
+                childCommentDetails[7] = rs.getString("num_of_child_comments"); // Child 댓글 수
+                childCommentDetailsList.add(childCommentDetails);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return childCommentDetailsList;
+    }
+
+
+    
+    
     private java.util.List<String[]> loadAllComments(int postId) {
 	    java.util.List<String[]> comments = new ArrayList<>();
 

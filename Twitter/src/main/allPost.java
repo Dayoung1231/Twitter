@@ -14,54 +14,36 @@ import java.awt.event.ActionListener;
 
 import model.*;
 
-public class allPost {
+public class allPost extends JFrame {
 
-	private JFrame frame;
+	// private JFrame frame;
 
 	// MySQL 연결 정보
     private static final String DB_URL = "jdbc:mysql://localhost:3306/Twitter";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "ekdud0412?";
     
-
-    
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					allPost window = new allPost();
-					window.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+    private static String currentUser;
 	
 
-	// 외부에서 프레임을 표시하기 위해 추가한 메서드
-    public void setVisible(boolean visible) {
-        frame.setVisible(visible);
-    }
 
-
-	public allPost() {
+	public allPost(String currentUser) {
+		// 현재 로그인된 유저
+		this.currentUser = currentUser;
 		initialize();
 	}
 
 
 	private void initialize() {
 		
-		// 현재 로그인된 유저
-		String currentUser = "user7"; // 실제 로그인 로직에 따라 변경 필요
 		
-	    frame = new JFrame();
-	    frame.setBounds(100, 100, 400, 600);
-	    frame.setLocationRelativeTo(null);
-	    frame.setResizable(false);
-	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    frame.getContentPane().setBackground(Color.WHITE);
-	    frame.getContentPane().setLayout(null);
+		setTitle("All Posts");
+	    setBounds(100, 100, 400, 600);
+	    setLocationRelativeTo(null);
+	    setResizable(false);
+	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	    getContentPane().setBackground(Color.WHITE);
+	    getContentPane().setLayout(null);
 
 	    
 	    // 상단 패널 생성
@@ -69,7 +51,7 @@ public class allPost {
 	    topPanel.setBackground(new Color(106, 181, 249)); // 트위터와 비슷한 파란색
 	    topPanel.setBounds(0, 0, 390, 60);
 	    topPanel.setLayout(null);
-	    frame.getContentPane().add(topPanel);
+	    getContentPane().add(topPanel);
 
 
 	    // 트위터 아이콘 로드
@@ -115,9 +97,9 @@ public class allPost {
                 // createPost 클래스의 프레임 호출
                 SwingUtilities.invokeLater(() -> {
                     try {
-                        createPost createPostWindow = new createPost();
+                        createPost createPostWindow = new createPost(currentUser);
                         createPostWindow.setVisible(true);
-                        frame.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+                        allPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -146,7 +128,7 @@ public class allPost {
 	    bottomPanel.setBackground(new Color(106, 181, 249));
 	    bottomPanel.setBounds(0, 519, 390, 44); // 하단에 고정
 	    bottomPanel.setLayout(new GridLayout(1, 3)); // 버튼을 균등하게 배치
-	    frame.getContentPane().add(bottomPanel);
+	    getContentPane().add(bottomPanel);
 
 	    // 프로필 버튼
 	    JButton profileButton = new JButton("Profile");
@@ -171,7 +153,28 @@ public class allPost {
 	    dmButton.setFocusPainted(false);
 	    dmButton.setBackground(new Color(106, 181, 249));
 	    bottomPanel.add(dmButton);
+	    
+	    
+	    /*
+	    // DM 버튼 클릭 이벤트 추가
+		dmButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
 
+               	// DM 창 생성
+               	SwingUtilities.invokeLater(() -> {
+               		try {
+                   		DMList DMListWindow = new DMList(currentUser);
+                        DMListWindow.setVisible(true);
+                        frame.dispose();
+                   	} catch (Exception ex) {
+                    	ex.printStackTrace();
+                    }
+           		});
+
+            }
+       	});
+	    */
 	    
 	    
 	    // 모든 포스트를 담을 컨테이너 패널
@@ -192,7 +195,7 @@ public class allPost {
 	    scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 0));
 	    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); // 가로 스크롤 비활성화
 	    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); // 세로 스크롤 활성화
-	    frame.getContentPane().add(scrollPane);
+	    getContentPane().add(scrollPane);
 
 	    // 모든 포스트 가져오기
 	    java.util.List<String[]> allPosts = loadAllPostsWithImages();
@@ -378,9 +381,9 @@ public class allPost {
 	                if (success) {
 	                    int newLikes = Integer.parseInt(likeLabel.getText()) + 1; // 좋아요 수 증가
 	                    likeLabel.setText(String.valueOf(newLikes)); // UI 업데이트
-	                    JOptionPane.showMessageDialog(frame, "Successfully liked!", "알림", JOptionPane.INFORMATION_MESSAGE);
+	                    JOptionPane.showMessageDialog(allPost.this, "Successfully liked!", "알림", JOptionPane.INFORMATION_MESSAGE);
 	                } else {
-	                    JOptionPane.showMessageDialog(frame, "Already liked.", "알림", JOptionPane.WARNING_MESSAGE);
+	                    JOptionPane.showMessageDialog(allPost.this, "Already liked.", "알림", JOptionPane.WARNING_MESSAGE);
 	                }
 	            }
 	        });
@@ -424,9 +427,9 @@ public class allPost {
 	                if (success) {
 	                	int newRetweet = Integer.parseInt(retweetLabel.getText()) + 1; // 리트윗 수 증가
 	                    retweetLabel.setText(String.valueOf(newRetweet)); // UI 업데이트
-	                    JOptionPane.showMessageDialog(frame, "Successfully retweet!", "알림", JOptionPane.INFORMATION_MESSAGE);
+	                    JOptionPane.showMessageDialog(allPost.this, "Successfully retweet!", "알림", JOptionPane.INFORMATION_MESSAGE);
 	                } else {
-	                    JOptionPane.showMessageDialog(frame, "Already retweet.", "알림", JOptionPane.WARNING_MESSAGE);
+	                    JOptionPane.showMessageDialog(allPost.this, "Already retweet.", "알림", JOptionPane.WARNING_MESSAGE);
 	                }
 	            }
 	        });
@@ -468,9 +471,9 @@ public class allPost {
 	                if (success) {
 	                	int newBookmark = Integer.parseInt(bookmarkLabel.getText()) + 1; // 북마크 수 증가
 	                    bookmarkLabel.setText(String.valueOf(newBookmark)); // UI 업데이트
-	                    JOptionPane.showMessageDialog(frame, "Successfully bookmarked", "알림", JOptionPane.INFORMATION_MESSAGE);
+	                    JOptionPane.showMessageDialog(allPost.this, "Successfully bookmarked", "알림", JOptionPane.INFORMATION_MESSAGE);
 	                } else {
-	                    JOptionPane.showMessageDialog(frame, "Already bookmarked.", "알림", JOptionPane.WARNING_MESSAGE);
+	                    JOptionPane.showMessageDialog(allPost.this, "Already bookmarked.", "알림", JOptionPane.WARNING_MESSAGE);
 	                }
 	            }
 	        });
@@ -496,9 +499,9 @@ public class allPost {
 	                // detailPost 클래스의 프레임 호출
 	                SwingUtilities.invokeLater(() -> {
 	                    try {
-	                        detailPost detailWindow = new detailPost(postId); // postId를 전달
+	                        detailPost detailWindow = new detailPost(postId, currentUser); // postId를 전달
 	                        detailWindow.setVisible(true);
-	                        frame.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+	                        allPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
 	                    } catch (Exception ex) {
 	                        ex.printStackTrace();
 	                    }

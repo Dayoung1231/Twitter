@@ -28,12 +28,13 @@ public class createPost extends JFrame {
     private JTextField nameField;
     private JTextField idField;
     
-    private String userID = "user7"; // 일단 설정
+    private String userID;
     private JTextArea messageArea;    // 메시지 입력 필드
     private JTextField photoURLField; // 포토 URL 필드
 
 
-	public createPost() {
+	public createPost(String currentUser) {
+		userID = currentUser;
 		initialize();
 	}
 
@@ -48,10 +49,10 @@ public class createPost extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(Color.WHITE);
         getContentPane().setLayout(null);
-        postPanel.setBackground(new Color(255, 255, 255));
         
         // 포스트 패널
         postPanel.setBounds(1, 1, 384, 562);
+        postPanel.setBackground(new Color(255, 255, 255));
         createPost.this.getContentPane().add(postPanel);
         postPanel.setLayout(null);
         
@@ -148,7 +149,7 @@ public class createPost extends JFrame {
                 // allPost 클래스의 프레임 호출
                 SwingUtilities.invokeLater(() -> {
                     try {
-                        allPost allPostWindow = new allPost();
+                        allPost allPostWindow = new allPost(userID);
                         allPostWindow.setVisible(true);
                         createPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
                     } catch (Exception ex) {
@@ -194,7 +195,7 @@ public class createPost extends JFrame {
                 // allPost 클래스의 프레임 호출
                 SwingUtilities.invokeLater(() -> {
                     try {
-                        allPost allPostWindow = new allPost();
+                        allPost allPostWindow = new allPost(userID);
                         allPostWindow.setVisible(true);
                         createPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
                     } catch (Exception ex) {

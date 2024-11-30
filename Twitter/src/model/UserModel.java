@@ -6,18 +6,31 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+
 public class UserModel {
 
-    /**
-     * 회원가입 기능
-     * @param id       사용자 ID
-     * @param pwd      비밀번호
-     * @param userName 사용자 이름
-     * @param phoneNum 전화번호
-     * @param email    이메일
-     * @return 성공 여부 (true: 성공, false: 실패)
-     */
-    public boolean signup(String id, String pwd, String userName, String phoneNum, String email) {
+
+    public boolean signup(String id, String pwd, String userName, String email, String phoneNum) {
+        try (Connection con = DatabaseConnection.getConnection()) {
+
+            // 사용자 등록
+            String registerUser = "INSERT INTO user (user_id, pwd, user_name, email, phone_num) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement registerStmt = con.prepareStatement(registerUser);
+            registerStmt.setString(1, id);
+            registerStmt.setString(2, pwd);
+            registerStmt.setString(3, userName);
+            registerStmt.setString(4, email);
+            registerStmt.setString(5, phoneNum);
+            registerStmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // ID 중복 확인
+    public boolean idCheck(String id) {
         try (Connection con = DatabaseConnection.getConnection()) {
             // ID 중복 확인
             String checkUserId = "SELECT user_id FROM user WHERE user_id = ?";
@@ -25,30 +38,28 @@ public class UserModel {
             checkStmt.setString(1, id);
             ResultSet rs = checkStmt.executeQuery();
             if (rs.next()) {
-                System.out.println("ID already exists.");
                 return false; // ID 중복
             }
 
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // Email 중복 확인
+    public boolean emailCheck(String email) {
+        try (Connection con = DatabaseConnection.getConnection()) {
             // 이메일 중복 확인
             String checkEmail = "SELECT user_id FROM user WHERE email = ?";
             PreparedStatement emailStmt = con.prepareStatement(checkEmail);
             emailStmt.setString(1, email);
-            rs = emailStmt.executeQuery();
+            ResultSet rs = emailStmt.executeQuery();
             if (rs.next()) {
-                System.out.println("Email already exists.");
                 return false; // 이메일 중복
             }
 
-            // 사용자 등록
-            String registerUser = "INSERT INTO user (user_id, pwd, user_name, phone_num, email) VALUES (?, ?, ?, ?, ?)";
-            PreparedStatement registerStmt = con.prepareStatement(registerUser);
-            registerStmt.setString(1, id);
-            registerStmt.setString(2, pwd);
-            registerStmt.setString(3, userName);
-            registerStmt.setString(4, phoneNum);
-            registerStmt.setString(5, email);
-            registerStmt.executeUpdate();
-            System.out.println("Signup successful!");
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,12 +67,25 @@ public class UserModel {
         }
     }
 
-    /**
-     * 로그인 기능
-     * @param id  사용자 ID
-     * @param pwd 비밀번호
-     * @return 로그인 성공 시 사용자 ID, 실패 시 null
-     */
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /* 사용하지 않으므로 주석 처리
     public String login(String id, String pwd) {
         try (Connection con = DatabaseConnection.getConnection()) {
             String loginQuery = "SELECT user_id FROM user WHERE user_id = ? AND pwd = ?";
@@ -82,13 +106,7 @@ public class UserModel {
         }
     }
 
-    /**
-     * 비밀번호 변경 기능
-     * @param id        사용자 ID
-     * @param currentPwd 현재 비밀번호
-     * @param newPwd     새 비밀번호
-     * @return 성공 여부 (true: 성공, false: 실패)
-     */
+
     public boolean changePassword(String id, String currentPwd, String newPwd) {
         try (Connection con = DatabaseConnection.getConnection()) {
             // 사용자 확인
@@ -116,4 +134,5 @@ public class UserModel {
             return false;
         }
     }
+    */
 }
