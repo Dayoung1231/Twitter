@@ -171,6 +171,23 @@ public class allPost extends JFrame {
 	        }
 	    });
 	    
+	    // dm 버튼 클릭 이벤트
+	    dmButton.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	        	// DMList 클래스의 프레임 호출
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        DMList DMWindow = new DMList(currentUser);
+                        DMWindow.setVisible(true);
+                        allPost.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+	        }
+	    });
+	    
 	    
 	    
 	    // 모든 포스트를 담을 컨테이너 패널

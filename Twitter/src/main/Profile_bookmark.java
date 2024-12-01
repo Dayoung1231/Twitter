@@ -200,6 +200,23 @@ public class Profile_bookmark extends JFrame {
 	        }
 	    });
 	    
+	    // dm 버튼 클릭 이벤트
+	    dmButton.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	        	// DMList 클래스의 프레임 호출
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        DMList DMWindow = new DMList(currentUser);
+                        DMWindow.setVisible(true);
+                        Profile_bookmark.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+	        }
+	    });
+	    
 	    // 프로필 패널 생성
 	    JPanel profilePanel = new JPanel();
 	    profilePanel.setBackground(Color.white);
