@@ -154,7 +154,7 @@ public class editProfile extends JFrame {
 	    
 	    // Button
 	    JButton editBtn = new JButton("Edit");
-	    editBtn.setBounds(230, 250, 95, 23);
+	    editBtn.setBounds(150, 250, 95, 23);
 	    editBtn.setFont(new Font("맑은 고딕", Font.BOLD, 13));
 	    editBtn.setForeground(Color.white); // 글자 색상: 흰색
         editBtn.setBackground(new Color(106, 181, 249)); // 배경 색상: 파란색
