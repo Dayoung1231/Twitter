@@ -45,7 +45,7 @@ public class PostModel {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                StringBuilder postDetails = new StringBuilder();
+                StringBuffer postDetails = new StringBuffer();
                 postDetails.append("Post ID: ").append(rs.getInt("post_id")).append("\n");
                 postDetails.append("Message: ").append(rs.getString("message")).append("\n");
                 postDetails.append("Photo URL: ").append(rs.getString("photo_url")).append("\n");

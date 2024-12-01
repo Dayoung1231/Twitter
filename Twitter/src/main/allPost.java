@@ -231,6 +231,29 @@ public class allPost extends JFrame {
 	            userImageBtn.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
 	        }
 
+	        // userImage 버튼 클릭 이벤트
+	        userImageBtn.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+
+	                // otherUserProfile 클래스의 프레임 호출
+	                SwingUtilities.invokeLater(() -> {
+	                    try {
+	                    	if (currentUser.equals(post[4])) {
+	                    		Profile myProfileWindow = new Profile(currentUser);
+	                    		myProfileWindow.setVisible(true);
+	                    		allPost.this.dispose();
+	                    	} else {
+	                    		otherUserProfile profileWindow = new otherUserProfile(currentUser, post[4]);
+		                        profileWindow.setVisible(true);
+		                        allPost.this.dispose();
+	                    	}
+	                    } catch (Exception ex) {
+	                        ex.printStackTrace();
+	                    }
+	                });
+	            }
+	        });
 	        
 	        // 유저 이름과 아이디 표시 (HTML로 스타일 적용)
 	        JLabel nameLabel = new JLabel();

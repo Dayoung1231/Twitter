@@ -38,6 +38,7 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 
 import model.BookmarkModel;
 import model.CommentModel;
@@ -241,6 +242,7 @@ public class Profile_bookmark extends JFrame {
         idField.setText("@" + currentUser);
         idField.setBounds(100, 54, 180, 19);
         idField.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
+        idField.setForeground(Color.gray);
         idField.setBorder(null);
         profilePanel.add(idField);
         idField.setColumns(10);
@@ -366,32 +368,35 @@ public class Profile_bookmark extends JFrame {
 	    
 	    // 포스트 목록 버튼
 	    JButton postBtn = new JButton("Posts");
-	    postBtn.setBounds(0, 5, 65, 25);
+	    postBtn.setBounds(0, 5, 130, 25);
 	    postBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
 	    postBtn.setForeground(Color.BLACK);
 	    postBtn.setFocusPainted(false);
-	    postBtn.setBackground(new Color(245, 245, 245));
-	    postBtn.setHorizontalAlignment(SwingConstants.LEFT);
+	    postBtn.setBackground(Color.WHITE);
+	    postBtn.setHorizontalAlignment(SwingConstants.CENTER);
+	    postBtn.setBorder(new LineBorder(Color.WHITE, 2));
 	    listPanel.add(postBtn);
 
 	    // 좋아요 목록 버튼
 	    JButton likeBtn = new JButton("Likes");
-	    likeBtn.setBounds(65, 5, 65, 25);
+	    likeBtn.setBounds(130, 5, 129, 25);
 	    likeBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
 	    likeBtn.setForeground(Color.BLACK);
 	    likeBtn.setFocusPainted(false);
-	    likeBtn.setBackground(new Color(245, 245, 245));
-	    likeBtn.setHorizontalAlignment(SwingConstants.LEFT);
+	    likeBtn.setBackground(Color.WHITE);
+	    likeBtn.setHorizontalAlignment(SwingConstants.CENTER);
+	    likeBtn.setBorder(new LineBorder(Color.WHITE, 2));
 	    listPanel.add(likeBtn);
 
 	    // 북마크 목록 버튼
 	    JButton bookmarkBtn = new JButton("BookMark");
-	    bookmarkBtn.setBounds(130, 5, 90, 25);
+	    bookmarkBtn.setBounds(259, 5, 139, 25);
 	    bookmarkBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
 	    bookmarkBtn.setForeground(Color.BLACK);
 	    bookmarkBtn.setFocusPainted(false);
 	    bookmarkBtn.setBackground(new Color(245, 245, 245));
-	    bookmarkBtn.setHorizontalAlignment(SwingConstants.LEFT);
+	    bookmarkBtn.setHorizontalAlignment(SwingConstants.CENTER);
+	    bookmarkBtn.setBorder(new LineBorder(Color.WHITE, 2));
 	    listPanel.add(bookmarkBtn);
 	    
 	    
@@ -488,6 +493,29 @@ public class Profile_bookmark extends JFrame {
 	            userImageButton.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
 	        }
 
+	        // userImage 버튼 클릭 이벤트
+	        userImageButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+
+	                // otherUserProfile 클래스의 프레임 호출
+	                SwingUtilities.invokeLater(() -> {
+	                    try {
+	                    	if (currentUser.equals(post[4])) {
+	                    		Profile myProfileWindow = new Profile(currentUser);
+	                    		myProfileWindow.setVisible(true);
+	                    		Profile_bookmark.this.dispose();
+	                    	} else {
+	                    		otherUserProfile profileWindow = new otherUserProfile(currentUser, post[4]);
+		                        profileWindow.setVisible(true);
+		                        Profile_bookmark.this.dispose();
+	                    	}
+	                    } catch (Exception ex) {
+	                        ex.printStackTrace();
+	                    }
+	                });
+	            }
+	        });
 	        
 	        // 유저 이름과 아이디 표시 (HTML로 스타일 적용)
 	        JLabel nameLabel = new JLabel();

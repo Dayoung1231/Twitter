@@ -80,6 +80,29 @@ public class detailPost extends JFrame {
             // 유저 사진 로드
             loadUserImage(userImageButton, postDetails[3]); // postDetails[3]에 유저 이미지 URL
 
+            // userImage 버튼 클릭 이벤트
+	        userImageButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+
+	                // otherUserProfile 클래스의 프레임 호출
+	                SwingUtilities.invokeLater(() -> {
+	                    try {
+	                    	if (userID.equals(postDetails[4])) {
+	                    		Profile myProfileWindow = new Profile(userID);
+	                    		myProfileWindow.setVisible(true);
+	                    		detailPost.this.dispose();
+	                    	} else {
+	                    		otherUserProfile profileWindow = new otherUserProfile(userID, postDetails[4]);
+		                        profileWindow.setVisible(true);
+		                        detailPost.this.dispose();
+	                    	}
+	                    } catch (Exception ex) {
+	                        ex.printStackTrace();
+	                    }
+	                });
+	            }
+	        });
             
             // 유저 이름
             JLabel userNameLabel = new JLabel(postDetails[0]);
@@ -447,6 +470,29 @@ public class detailPost extends JFrame {
 	            userImageBtn.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
 	        }
 
+	        // userImage 버튼 클릭 이벤트
+	        userImageBtn.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+
+	                // otherUserProfile 클래스의 프레임 호출
+	                SwingUtilities.invokeLater(() -> {
+	                    try {
+	                    	if (userID.equals(comment[2])) {
+	                    		Profile myProfileWindow = new Profile(userID);
+	                    		myProfileWindow.setVisible(true);
+	                    		detailPost.this.dispose();
+	                    	} else {
+	                    		otherUserProfile profileWindow = new otherUserProfile(userID, comment[2]);
+		                        profileWindow.setVisible(true);
+		                        detailPost.this.dispose();
+	                    	}
+	                    } catch (Exception ex) {
+	                        ex.printStackTrace();
+	                    }
+	                });
+	            }
+	        });
 	        
 	        // 유저 이름과 아이디 표시 (HTML로 스타일 적용)
 	        JLabel nameLabel = new JLabel();

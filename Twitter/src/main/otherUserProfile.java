@@ -38,9 +38,11 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 
 import model.BookmarkModel;
 import model.CommentModel;
+import model.FollowModel;
 import model.LikeModel;
 import model.RetweetModel;
 
@@ -203,6 +205,7 @@ public class otherUserProfile extends JFrame {
         idField.setText("@" + otherUser);
         idField.setBounds(100, 54, 180, 19);
         idField.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
+        idField.setForeground(Color.gray);
         idField.setBorder(null);
         profilePanel.add(idField);
         idField.setColumns(10);
@@ -254,6 +257,73 @@ public class otherUserProfile extends JFrame {
         int followersCount = getFollowersCount(otherUser);
         followersBtn.setText(followersCount + " Followers");
 
+        
+        
+        // 해당 유저를 팔로우하는 버튼 생성 및 초기화
+        JButton followBtn = new JButton("Follow");
+        followBtn.setBounds(290, 20, 75, 25); // 버튼 위치 및 크기 설정
+        followBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+        followBtn.setContentAreaFilled(true); // 배경 활성화
+        followBtn.setOpaque(true); // 불투명 활성화
+        followBtn.setHorizontalAlignment(SwingConstants.CENTER);
+        followBtn.setBorder(BorderFactory.createLineBorder(new Color(245, 245, 245), 2)); // 버튼 테두리
+        followBtn.setFocusPainted(false); 
+        profilePanel.add(followBtn);
+
+        // FollowModel 인스턴스 생성
+        FollowModel followModel = new FollowModel();
+
+        // boolean 배열로 선언 (final 변수처럼 사용 가능)
+        final boolean[] isFollowing = { followModel.isFollowing(currentUser, otherUser) };
+
+        // 팔로우 여부에 따른 버튼 설정
+        if (isFollowing[0]) {
+            followBtn.setText("Following");
+            followBtn.setBackground(Color.WHITE);
+            followBtn.setForeground(new Color(50, 50, 50));
+        } else {
+            followBtn.setText("Follow");
+            followBtn.setBackground(new Color(106, 181, 249)); // 파란 글자
+            followBtn.setForeground(Color.WHITE);
+        }
+
+        // follow 버튼 클릭 이벤트
+        followBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isFollowing[0]) {
+                    // 언팔로우 처리
+                    boolean success = followModel.unfollowUser(currentUser, otherUser);
+                    if (success) {
+                        followBtn.setText("Follow");
+                        followBtn.setBackground(new Color(106, 181, 249)); // 파란색
+                        followBtn.setForeground(Color.WHITE);
+                        isFollowing[0] = false; // 상태 업데이트
+                        JOptionPane.showMessageDialog(null, "Unfollowed successfully!");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Failed to unfollow.");
+                    }
+                } else {
+                    // 팔로우 처리
+                    boolean success = followModel.followUser(currentUser, otherUser);
+                    if (success) {
+                        followBtn.setText("Following");
+                        followBtn.setBackground(Color.WHITE);
+                        followBtn.setForeground(new Color(50, 50, 50));
+                        isFollowing[0] = true; // 상태 업데이트
+                        JOptionPane.showMessageDialog(null, "Successfully followed!");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "You are already following this user.");
+                    }
+                }
+                
+                // 버튼 상태 변경 후 UI 갱신
+                followBtn.revalidate(); // 레이아웃 갱신
+                followBtn.repaint();    // 화면 갱신
+            }
+        });
+       
+        
 	    
 	    // 내 포스트 목록 패널 생성
 	    JPanel listPanel = new JPanel();
@@ -264,12 +334,13 @@ public class otherUserProfile extends JFrame {
 	    
 	    // 포스트 목록 버튼
 	    JButton postBtn = new JButton("Posts");
-	    postBtn.setBounds(0, 5, 65, 25);
+	    postBtn.setBounds(0, 5, 400, 25);
 	    postBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
 	    postBtn.setForeground(Color.BLACK);
 	    postBtn.setFocusPainted(false);
-	    postBtn.setBackground(new Color(245, 245, 245));
-	    postBtn.setHorizontalAlignment(SwingConstants.LEFT);
+	    postBtn.setBackground(Color.WHITE);
+	    postBtn.setHorizontalAlignment(SwingConstants.CENTER);
+	    postBtn.setBorder(new LineBorder(Color.WHITE, 2));
 	    listPanel.add(postBtn);
 	    
 	    
@@ -330,6 +401,29 @@ public class otherUserProfile extends JFrame {
 	            userImageButton.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
 	        }
 
+	        // userImage 버튼 클릭 이벤트
+	        userImageButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+
+	                // otherUserProfile 클래스의 프레임 호출
+	                SwingUtilities.invokeLater(() -> {
+	                    try {
+	                    	if (currentUser.equals(post[4])) {
+	                    		Profile myProfileWindow = new Profile(currentUser);
+	                    		myProfileWindow.setVisible(true);
+	                    		otherUserProfile.this.dispose();
+	                    	} else {
+	                    		otherUserProfile profileWindow = new otherUserProfile(currentUser, post[4]);
+		                        profileWindow.setVisible(true);
+		                        otherUserProfile.this.dispose();
+	                    	}
+	                    } catch (Exception ex) {
+	                        ex.printStackTrace();
+	                    }
+	                });
+	            }
+	        });
 	        
 	        // 유저 이름과 아이디 표시 (HTML로 스타일 적용)
 	        JLabel nameLabel = new JLabel();
@@ -894,4 +988,32 @@ public class otherUserProfile extends JFrame {
     }
 
 
+    private java.util.List<String[]> loadFollowingUsers(String currentUser) {
+	    java.util.List<String[]> allFollowing = new ArrayList<>();
+
+	    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+	        // f_id 순서대로 정렬
+	        String query = "SELECT u.user_name, u.user_id, u.image_url " +
+	                       "FROM FOLLOWING f " +
+	                       "JOIN USER u ON f.following_id = u.user_id " +
+	                       "WHERE f.user_id = ? " +
+	                       "ORDER BY f.f_id ASC";
+
+	        PreparedStatement pstmt = conn.prepareStatement(query);
+	        pstmt.setString(1, currentUser);
+
+	        ResultSet rs = pstmt.executeQuery();
+	        while (rs.next()) {
+	            String[] userDetails = new String[3]; // 배열 크기를 3으로 설정
+	            userDetails[0] = rs.getString("user_name"); // 유저 이름
+	            userDetails[1] = rs.getString("user_id");   // 유저 아이디
+	            userDetails[2] = rs.getString("image_url"); // 프로필 이미지 URL
+	            allFollowing.add(userDetails);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return allFollowing;
+	}
 }

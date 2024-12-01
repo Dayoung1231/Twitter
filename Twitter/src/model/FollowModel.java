@@ -120,7 +120,7 @@ public class FollowModel {
             stmt.setString(1, userId);
             ResultSet rs = stmt.executeQuery();
 
-            StringBuilder followingList = new StringBuilder();
+            StringBuffer followingList = new StringBuffer();
             while (rs.next()) {
                 followingList.append(rs.getString("following_id")).append("\n");
             }
@@ -150,7 +150,7 @@ public class FollowModel {
             stmt.setString(1, userId);
             ResultSet rs = stmt.executeQuery();
 
-            StringBuilder followerList = new StringBuilder();
+            StringBuffer followerList = new StringBuffer();
             while (rs.next()) {
                 followerList.append(rs.getString("follower_id")).append("\n");
             }

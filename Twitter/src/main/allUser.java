@@ -179,6 +179,23 @@ public class allUser extends JFrame {
 	            userImageButton.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
 	        }
 
+	        // userImage 버튼 클릭 이벤트
+	        userImageButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+
+	                // otherUserProfile 클래스의 프레임 호출
+	                SwingUtilities.invokeLater(() -> {
+	                    try {
+	                    	otherUserProfile profileWindow = new otherUserProfile(currentUser, user[1]);
+		                    profileWindow.setVisible(true);
+		                    allUser.this.dispose();
+	                    } catch (Exception ex) {
+	                        ex.printStackTrace();
+	                    }
+	                });
+	            }
+	        });
 	        
 	        // 유저 이름과 아이디 표시 (HTML로 스타일 적용)
 	        JLabel nameLabel = new JLabel();
@@ -238,12 +255,12 @@ public class allUser extends JFrame {
 	        // 팔로우 여부에 따른 버튼 설정
 	        if (isFollowing[0]) {
 	            followBtn.setText("Following");
-	            followBtn.setBackground(new Color(106, 181, 249)); // 파란색
-	            followBtn.setForeground(Color.WHITE); // 글자 흰색
+	            followBtn.setBackground(Color.WHITE);
+	            followBtn.setForeground(new Color(50, 50, 50));
 	        } else {
 	            followBtn.setText("Follow");
-	            followBtn.setBackground(Color.WHITE); // 흰색
-	            followBtn.setForeground(new Color(106, 181, 249)); // 파란 글자
+	            followBtn.setBackground(new Color(106, 181, 249)); // 파란 글자
+	            followBtn.setForeground(Color.WHITE);
 	        }
 
 	        // follow 버튼 클릭 이벤트
@@ -255,8 +272,8 @@ public class allUser extends JFrame {
 	                    boolean success = followModel.unfollowUser(currentUser, user[1]);
 	                    if (success) {
 	                        followBtn.setText("Follow");
-	                        followBtn.setBackground(Color.WHITE); // 흰색
-	                        followBtn.setForeground(new Color(106, 181, 249)); // 파란 글자
+	                        followBtn.setBackground(new Color(106, 181, 249)); // 파란색
+	                        followBtn.setForeground(Color.WHITE);
 	                        isFollowing[0] = false; // 상태 업데이트
 	                        JOptionPane.showMessageDialog(null, "Unfollowed " + user[0] + " successfully!");
 	                    } else {
@@ -267,8 +284,8 @@ public class allUser extends JFrame {
 	                    boolean success = followModel.followUser(currentUser, user[1]);
 	                    if (success) {
 	                        followBtn.setText("Following");
-	                        followBtn.setBackground(new Color(106, 181, 249)); // 파란색
-	                        followBtn.setForeground(Color.WHITE); // 글자 흰색
+	                        followBtn.setBackground(Color.WHITE);
+	                        followBtn.setForeground(new Color(50, 50, 50));
 	                        isFollowing[0] = true; // 상태 업데이트
 	                        JOptionPane.showMessageDialog(null, "Successfully followed " + user[0] + "!");
 	                    } else {

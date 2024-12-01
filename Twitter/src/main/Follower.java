@@ -10,6 +10,7 @@ import javax.swing.*;
 
 import model.BookmarkModel;
 import model.CommentModel;
+import model.FollowModel;
 import model.LikeModel;
 import model.RetweetModel;
 
@@ -179,13 +180,30 @@ public class Follower extends JFrame {
 	            userImageButton.setIcon(getDefaultUserImageIcon(50)); // 기본 이미지
 	        }
 
+	        // userImage 버튼 클릭 이벤트
+	        userImageButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+
+	                // otherUserProfile 클래스의 프레임 호출
+	                SwingUtilities.invokeLater(() -> {
+	                    try {
+	                    	otherUserProfile profileWindow = new otherUserProfile(currentUser, follower[1]);
+		                    profileWindow.setVisible(true);
+		                    Follower.this.dispose();
+	                    } catch (Exception ex) {
+	                        ex.printStackTrace();
+	                    }
+	                });
+	            }
+	        });
 	        
 	        // 유저 이름과 아이디 표시 (HTML로 스타일 적용)
 	        JLabel nameLabel = new JLabel();
-	        nameLabel.setText("<html><span style='font-size:12px;'>" + follower[0] + "</span> " +
+	        nameLabel.setText("<html><span style='font-size:12px;'>" + follower[0] + "</span><br> " +
 	                          "<span style='font-size:10px; color:gray;'>@" + follower[1] + "</span></html>");
 	        nameLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 12)); // 기본 폰트 설정 (HTML 내부 스타일로 크기 조정 가능)
-	        nameLabel.setBounds(70, 13, 280, 23); // 크기와 위치 설정
+	        nameLabel.setBounds(70, 13, 280, 46); // 크기와 위치 설정
 	        followerPanel.add(nameLabel);
 
 	        
@@ -218,6 +236,65 @@ public class Follower extends JFrame {
 	            }
 	        });
 
+
+	        // follow 버튼 생성 및 초기화
+	        JButton followBtn = new JButton("Follow");
+	        followBtn.setBounds(230, 13, 55, 23); // 버튼 위치 및 크기 설정
+	        followBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
+	        followBtn.setContentAreaFilled(true); // 배경 활성화
+	        followBtn.setOpaque(true); // 불투명 활성화
+	        followBtn.setBorder(BorderFactory.createLineBorder(new Color(245, 245, 245), 2)); // 버튼 테두리
+	        followBtn.setFocusPainted(false); 
+	        followerPanel.add(followBtn);
+
+	        // FollowModel 인스턴스 생성
+	        FollowModel followModel = new FollowModel();
+
+	        // boolean 배열로 선언 (final 변수처럼 사용 가능)
+	        final boolean[] isFollowing = { followModel.isFollowing(currentUser, follower[1]) };
+
+	        // 팔로우 여부에 따른 버튼 설정
+	        if (isFollowing[0]) {
+	            followBtn.setText("Following");
+	            followBtn.setBackground(Color.WHITE);
+	            followBtn.setForeground(new Color(50, 50, 50));
+	        } else {
+	            followBtn.setText("Follow");
+	            followBtn.setBackground(new Color(106, 181, 249)); // 파란 글자
+	            followBtn.setForeground(Color.WHITE);
+	        }
+
+	        // follow 버튼 클릭 이벤트
+	        followBtn.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                if (isFollowing[0]) {
+	                    // 언팔로우 처리
+	                    boolean success = followModel.unfollowUser(currentUser, follower[1]);
+	                    if (success) {
+	                        followBtn.setText("Follow");
+	                        followBtn.setBackground(new Color(106, 181, 249)); // 파란색
+	                        followBtn.setForeground(Color.WHITE);
+	                        isFollowing[0] = false; // 상태 업데이트
+	                        JOptionPane.showMessageDialog(null, "Unfollowed " + follower[0] + " successfully!");
+	                    } else {
+	                        JOptionPane.showMessageDialog(null, "Failed to unfollow " + follower[0] + ".");
+	                    }
+	                } else {
+	                    // 팔로우 처리
+	                    boolean success = followModel.followUser(currentUser, follower[1]);
+	                    if (success) {
+	                        followBtn.setText("Following");
+	                        followBtn.setBackground(Color.WHITE);
+	                        followBtn.setForeground(new Color(50, 50, 50));
+	                        isFollowing[0] = true; // 상태 업데이트
+	                        JOptionPane.showMessageDialog(null, "Successfully followed " + follower[0] + "!");
+	                    } else {
+	                        JOptionPane.showMessageDialog(null, "You are already following this user.");
+	                    }
+	                }
+	            }
+	        });
 
 
 	        // followerPanel을 containerPanel에 추가

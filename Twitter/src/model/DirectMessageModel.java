@@ -76,7 +76,7 @@ public class DirectMessageModel {
             stmt.setString(4, userId1);
             ResultSet rs = stmt.executeQuery();
 
-            StringBuilder conversation = new StringBuilder();
+            StringBuffer conversation = new StringBuffer();
             while (rs.next()) {
                 String senderId = rs.getString("sender_id");
                 String receiverId = rs.getString("receiver_id");

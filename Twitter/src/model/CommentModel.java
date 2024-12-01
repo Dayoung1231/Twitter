@@ -45,7 +45,7 @@ public class CommentModel {
             stmt.setInt(1, postId);
             ResultSet rs = stmt.executeQuery();
 
-            StringBuilder comments = new StringBuilder();
+            StringBuffer comments = new StringBuffer();
             while (rs.next()) {
                 comments.append("Comment ID: ").append(rs.getInt("comment_id")).append("\n");
                 comments.append("Message: ").append(rs.getString("message")).append("\n");
