@@ -853,7 +853,7 @@ public class Profile extends JFrame {
 
 	        ResultSet rs = pstmt.executeQuery();
 	        while (rs.next()) {
-	            String[] postDetails = new String[10]; // 배열 크기를 10으로 유지
+	            String[] postDetails = new String[10]; // 배열 크기 10
 	            postDetails[0] = rs.getString("user_name"); // 유저 이름
 	            postDetails[1] = rs.getString("message");   // 메시지
 	            postDetails[2] = rs.getTimestamp("created_at").toString(); // 생성일

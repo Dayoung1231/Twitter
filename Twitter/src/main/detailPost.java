@@ -638,7 +638,7 @@ public class detailPost extends JFrame {
     private String[] loadPostDetails(int postId) {
         String[] postDetails = null;
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            // 수정된 SQL 쿼리: 게시물의 댓글 수, 리트윗 수, 북마크 수도 가져오기
+            // SQL 쿼리: 해당 포스트의 정보 가져오기 / 게시물의 댓글 수, 리트윗 수, 북마크 수도 가져오기
             String query = "SELECT u.user_name, p.message, p.created_at, u.image_url, u.user_id, p.photo_url, p.num_of_likes, " +
                     "(SELECT COUNT(*) FROM COMMENT WHERE post_id = p.post_id) AS comment_count, " +
                     "(SELECT COUNT(*) FROM RETWEET WHERE post_id = p.post_id) AS retweet_count, " +

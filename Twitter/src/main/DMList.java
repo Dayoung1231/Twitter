@@ -398,7 +398,7 @@ public class DMList extends JFrame {
         }
     }
 
-    // 데이터베이스에서 현재 유저가 받은 모든 DM을 사용자별으로 불러오는 메서드
+    // 현재 유저가 받은 모든 DM을 사용자별으로 불러오는 메서드
     private void loadUserGroupedDirectMessages() {
         listModel.clear(); // 리스트 초기화
 
@@ -444,17 +444,16 @@ public class DMList extends JFrame {
                 }
             }
         } catch (SQLException ex) {
-            logError("데이터베이스 접근 중 오류가 발생했습니다: " + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "데이터베이스 접근 중 오류가 발생했습니다: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            logError("Database error: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
 
     // 선택한 사용자와의 채팅 기록 불러오기
     private void switchToChatWindow() {
-        // 기존에 CardLayout에서 JPanel에 추가하는 방식이 아니고 JFrame을 사용하여 새 창을 띄우음
         new ChatWindow(this, connection, userId, currentRecipientId, currentRecipientName);
-        this.setVisible(false); // 현재 창을 숨기기
+        this.setVisible(false);
     }
 
     private void switchToNewMessagePanel() {

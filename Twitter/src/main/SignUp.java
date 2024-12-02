@@ -116,7 +116,7 @@ public class SignUp extends JFrame {
             SwingUtilities.invokeLater(() -> {
                 Login loginWindow = new Login();
                 loginWindow.setVisible(true);
-                dispose(); // Close the current window
+                dispose();
             });
         });
         

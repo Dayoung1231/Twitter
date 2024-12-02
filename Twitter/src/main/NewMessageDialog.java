@@ -132,7 +132,7 @@ public class NewMessageDialog extends JPanel {
                        "FROM user " +
                        "WHERE user_name LIKE ? AND user_id != ?"; // 현재 사용자를 제외
         try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, "%" + filterText + "%");
+            ps.setString(1, "%" + filterText + "%"); // 검색어를 포함하는 사용자 이름
             ps.setString(2, userId); // 현재 사용자의 ID를 조건에 추가
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -142,7 +142,7 @@ public class NewMessageDialog extends JPanel {
                 userModel.addElement(new String[]{userName, userId, imageUrl});
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "데이터베이스 접근 중 오류가 발생했습니다: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

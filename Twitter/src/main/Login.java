@@ -130,7 +130,7 @@ public class Login {
 	                        if (storedPassword.equals(passwordInput)) {
 	                            JOptionPane.showMessageDialog(null, "Logged in!");
 	                            
-	                            // Pass user_id to allPost
+	                            // allPost로 화면 전환
 	                            EventQueue.invokeLater(() -> {
 	                                allPost allPostWindow = new allPost(userIdInput);
 	                                allPostWindow.setVisible(true);

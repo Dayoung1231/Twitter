@@ -35,7 +35,7 @@ public class Following extends JFrame {
 
 	private void initialize(String currentUser) {
         // JFrame 설정
-        setTitle("Post Details");
+        setTitle("Following");
         setBounds(100, 100, 400, 600);
         setLocationRelativeTo(null);
         setResizable(false);

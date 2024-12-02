@@ -35,7 +35,7 @@ public class allUser extends JFrame {
 
 	private void initialize(String currentUser) {
         // JFrame 설정
-        setTitle("Post Details");
+        setTitle("User List");
         setBounds(100, 100, 400, 600);
         setLocationRelativeTo(null);
         setResizable(false);

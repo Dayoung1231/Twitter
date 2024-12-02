@@ -565,7 +565,7 @@ public class allPost extends JFrame {
 	    java.util.List<String[]> posts = new ArrayList<>();
 
 	    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-	        // 모든 포스트와 유저 이미지를 가져오는 SQL 쿼리
+	        // 모든 포스트와 해당 포스트 작성자의 정보를 가져오는 SQL 쿼리
 	        String query = "SELECT u.user_name, p.message, p.created_at, u.image_url, u.user_id, p.post_id, p.num_of_likes, " +
 	                "(SELECT COUNT(*) FROM COMMENT WHERE post_id = p.post_id) AS comment_count, " +
 	                "(SELECT COUNT(*) FROM RETWEET WHERE post_id = p.post_id) AS retweet_count, " +

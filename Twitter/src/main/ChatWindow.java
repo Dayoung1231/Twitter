@@ -3,6 +3,9 @@ package main;
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,60 +27,151 @@ public class ChatWindow extends JFrame {
         this.recipientId = recipientId;
         this.recipientName = recipientName;
 
-        setLayout(new BorderLayout());
-        setSize(400, 600);
+        setBounds(100, 100, 400, 600);
+       setLocationRelativeTo(null);
+       setResizable(false);
+       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+       getContentPane().setBackground(Color.WHITE);
+       getContentPane().setLayout(null);
+       
+       // setLayout(new BorderLayout());
+        //setSize(400, 600);
 
         // 상단 패널 설정
         JPanel topPanel = new JPanel();
         topPanel.setBackground(new Color(106, 181, 249)); // 상단 패널 배경색 설정
-        topPanel.setPreferredSize(new Dimension(400, 60));
-        topPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        add(topPanel, BorderLayout.NORTH);
+        topPanel.setBounds(0, 0, 390, 60);
+       topPanel.setLayout(null);
+       ChatWindow.this.getContentPane().add(topPanel);
+        //topPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        //add(topPanel, BorderLayout.NORTH);
 
-        JLabel textLabel = new JLabel("Chat with " + recipientName);
-        textLabel.setFont(new Font("Arial", Font.BOLD, 20)); // 상단 제목 설정
+    // 트위터 아이콘 로드
+       try {
+           URL imageUrl = getClass().getResource("/images/twitterBird.jpeg");
+           if (imageUrl != null) {
+              ImageIcon twitterIcon = new ImageIcon(imageUrl);
+                Image scaledImage = twitterIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+                twitterIcon = new ImageIcon(scaledImage);
+               JLabel twitterLabel = new JLabel(twitterIcon);
+               twitterLabel.setBounds(10, 10, 40, 40);
+               topPanel.add(twitterLabel);
+           }
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+       
+        JLabel textLabel = new JLabel(recipientName);
+        textLabel.setFont(new Font("Arial", Font.BOLD, 20)); 
         textLabel.setForeground(Color.WHITE);
+        textLabel.setBounds(60, 15, 150, 30);
         topPanel.add(textLabel);
+
 
         // 뒤로 가기 버튼 추가
         JButton backButton = new JButton("Back");
-        backButton.setFont(new Font("Arial", Font.BOLD, 15));
-        backButton.setForeground(Color.WHITE);
-        backButton.setBackground(new Color(106, 181, 249));
+        backButton.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        backButton.setBounds(290, 20, 80, 26);
+        backButton.setForeground(new Color(106, 181, 249)); // 글자 색상: 흰색
+        backButton.setBackground(Color.WHITE);
         backButton.setFocusPainted(false);
         backButton.setBorderPainted(false);
-        backButton.addActionListener(e -> {
-            parent.setVisible(true);
-            this.dispose();
-        });
+        backButton.setOpaque(false); // 불투명 효과 제거
+        backButton.setContentAreaFilled(false); // 버튼 배경 투명 처리
         topPanel.add(backButton);
+        
+     // back 버튼 클릭 이벤트
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
 
-        // 채팅 내용을 보여주는 영역
+               
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        DMList chatWindow = new DMList(userId);
+                        chatWindow.setVisible(true);
+                        ChatWindow.this.dispose(); // 현재 프레임 닫기 (필요 시 유지)
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }
+        });
+        
+     // 둥근 버튼 모양 만들기
+        backButton.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
+            @Override
+            public void paint(Graphics g, JComponent c) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // 버튼 배경 채우기
+                g2.setColor(backButton.getBackground());
+                g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 30, 30); // 둥근 사각형: 30px radius
+
+                super.paint(g, c);
+            }
+        });
+        
+
+     // 모든 포스트를 담을 chat 패널
         chatPanel = new JPanel();
-        chatPanel.setLayout(new BoxLayout(chatPanel, BoxLayout.Y_AXIS));
-        chatPanel.setBackground(Color.WHITE); // 배경색 설정
-        JScrollPane chatScrollPane = new JScrollPane(chatPanel);
-        chatScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        chatScrollPane.getViewport().setBackground(Color.WHITE); // 스크롤 패널의 배경색 설정
-        add(chatScrollPane, BorderLayout.CENTER);
+       chatPanel.setBackground(new Color(255, 255, 255));
+       //containerPanel.setLayout(null); // 자유 배치
+       chatPanel.setLayout(new BoxLayout(chatPanel, BoxLayout.Y_AXIS)); // BoxLayout으로 설정하여 자동 크기 조정containerPanel.setLayout(new BoxLayout(containerPanel, BoxLayout.Y_AXIS)); // BoxLayout으로 설정하여 자동 크기 조정
+       chatPanel.setPreferredSize(new Dimension(200, 150)); // 초기 크기 설정??????
 
+       // 스크롤 패널
+       JScrollPane scrollPane = new JScrollPane(chatPanel);
+       scrollPane.setBounds(0, 60, 386, 440);
+       scrollPane.getVerticalScrollBar().setUnitIncrement(16); // 스크롤 속도 조정
+       // 세로 스크롤바 스타일 적용
+       scrollPane.getVerticalScrollBar().setUI(new ScrollBarUI());
+       scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0)); // 너비를 8로 설정 (이미지처럼 얇게)
+       // 가로 스크롤바 숨기기 (필요 시 추가)
+       scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 0));
+       scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); // 가로 스크롤 비활성화
+       scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); // 세로 스크롤 활성화
+       scrollPane.getVerticalScrollBar().setBlockIncrement(50);
+       getContentPane().add(scrollPane);
+
+       //this.add(scrollPane, BorderLayout.CENTER);
+       
         // 채팅 기록 불러오기
         loadChatHistory();
+        
 
-        // 메시지 입력 및 전송 버튼
+        
+     // 하단 패널 생성
+        JPanel sendMsgPanel = new JPanel(new BorderLayout());
+        sendMsgPanel.setBackground(new Color(245, 245, 245)); // 배경색 설정
+        sendMsgPanel.setBounds(0, 500, 390, 61); // 하단에 고정
+        getContentPane().add(sendMsgPanel);
+
+        // 메시지 입력 필드
         messageField = new JTextField();
         messageField.setFont(new Font("Arial", Font.PLAIN, 14));
+        messageField.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        sendMsgPanel.add(messageField, BorderLayout.CENTER);
+
+        // 전송 버튼
         sendButton = new JButton("Send");
         sendButton.setFont(new Font("Arial", Font.BOLD, 14));
-        sendButton.setBackground(new Color(106, 181, 249)); // send 버튼
+        sendButton.setBackground(new Color(106, 181, 249));
         sendButton.setForeground(Color.WHITE);
-        sendButton.addActionListener(e -> sendMessage());
+        sendButton.setFocusPainted(false);
+        sendButton.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        sendMsgPanel.add(sendButton, BorderLayout.EAST);
+        
+        sendButton.addActionListener(e -> {
+            System.out.println("Send button clicked");
+            sendMessage();
+        });
 
-        JPanel sendPanel = new JPanel(new BorderLayout());
-        sendPanel.add(messageField, BorderLayout.CENTER);
-        sendPanel.add(sendButton, BorderLayout.EAST);
-        sendPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        add(sendPanel, BorderLayout.SOUTH);
+
+   
+        sendMsgPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(sendMsgPanel, BorderLayout.SOUTH);
 
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -105,7 +199,7 @@ public class ChatWindow extends JFrame {
                 }
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "채팅 기록을 불러오는 중 오류가 발생했습니다: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "error:loading chatting history : " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -133,51 +227,88 @@ public class ChatWindow extends JFrame {
         }
     }
 
-    // 채팅 패널에 메시지를 추가하는 메서드
+ // 채팅 패널에 메시지를 추가하는 메서드
     private void addMessageToChatPanel(String sender, String message, String time, boolean isUserMessage) {
-        JPanel messagePanel = new JPanel();
-        
-        // 상대방 메시지 왼쪽 정렬, 내 메시지 오른쪽 정렬
-        FlowLayout layout = isUserMessage ? new FlowLayout(FlowLayout.RIGHT) : new FlowLayout(FlowLayout.LEFT);
-        messagePanel.setLayout(layout);
-        messagePanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // 여백 설정
-        messagePanel.setBackground(Color.WHITE);
-        
-        // 메시지 내용 길이에 맞춰서 줄바꿈 처리
-        StringBuffer formattedMessage = new StringBuffer("<html>");
-        int maxLineLength = 30; // 최대 길이 설정
-        for (int i = 0; i < message.length(); i += maxLineLength) {
-            int end = Math.min(i + maxLineLength, message.length());
-            formattedMessage.append(message.substring(i, end)).append("<br>");
-        }
-        formattedMessage.append("</html>");
+        // 메시지 텍스트 영역
+        JTextPane messagePane = new JTextPane();
+        messagePane.setContentType("text/html"); // HTML 형식으로 메시지 표시
+        messagePane.setText(formatMessage(message)); // 메시지를 HTML 형식으로 변환
+        messagePane.setEditable(false);
+        messagePane.setFont(new Font("Arial", Font.PLAIN, 14));
+        messagePane.setBackground(isUserMessage ? Color.WHITE : new Color(245, 245, 245));
+        messagePane.setForeground(isUserMessage ? Color.WHITE : Color.BLACK);
+        messagePane.setBorder(BorderFactory.createCompoundBorder(
+                new RoundedBorder(15), // 둥근 테두리
+                BorderFactory.createEmptyBorder(5, 10, 5, 10) // 내부 여백
+        ));
 
         
-        JLabel messageLabel = new JLabel(formattedMessage.toString());
-        messageLabel.setOpaque(true);
-        messageLabel.setBorder(BorderFactory.createCompoundBorder(
-                new RoundedBorder(15), // 모서리를 둥글게 만듦
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
-        messageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        messageLabel.setBackground(isUserMessage ? new Color(106, 181, 249) : new Color(245, 245, 245)); // 유저 메시지는 파란색, 상대방 메시지는 회색
-        messageLabel.setForeground(isUserMessage ? Color.WHITE : Color.BLACK); // 유저 메시지는 흰색 글자, 상대방 메시지는 검정 글자
+        messagePane.setSize(new Dimension(100, Short.MAX_VALUE)); // 가로 고정, 세로 제한 해제
+        int preferredHeight = messagePane.getPreferredSize().height; // 자동 계산된 높이
+        messagePane.setPreferredSize(new Dimension(100, preferredHeight)); // 동적 세로 높이 적용
+
+        // 메시지와 시간 표시를 위한 패널
+        JPanel bubblePanel = new JPanel();
+        bubblePanel.setLayout(new BoxLayout(bubblePanel, BoxLayout.Y_AXIS));
+        bubblePanel.setAlignmentX(isUserMessage ? Component.LEFT_ALIGNMENT : Component.RIGHT_ALIGNMENT);
+        bubblePanel.setOpaque(false); // 투명 배경 설정
+        bubblePanel.add(messagePane);
 
         // 시간 레이블 추가
         JLabel timeLabel = new JLabel(time);
         timeLabel.setFont(new Font("Arial", Font.PLAIN, 10));
         timeLabel.setForeground(Color.GRAY);
-        
-        // messageLabel과 timeLabel을 수직으로 배치하기 위해 BoxLayout 사용
-        BoxLayout boxLayout = new BoxLayout(messagePanel, BoxLayout.Y_AXIS);
-        messagePanel.setLayout(boxLayout);
-        messagePanel.add(messageLabel);
-        messagePanel.add(timeLabel); // 시간은 메시지 아래에 배치
+        timeLabel.setAlignmentX(isUserMessage ? Component.LEFT_ALIGNMENT : Component.RIGHT_ALIGNMENT);
+        timeLabel.setHorizontalAlignment(isUserMessage ? SwingConstants.LEFT : SwingConstants.RIGHT);
 
-        // 상대방 메시지인 경우 왼쪽 정렬, 내 메시지인 경우 오른쪽 정렬
-        chatPanel.add(messagePanel);
-        chatPanel.add(Box.createVerticalStrut(10)); // 메시지 간의 간격 추가
+        bubblePanel.add(timeLabel);
+
+        // 채팅 패널에 추가
+        chatPanel.add(bubblePanel);
+        chatPanel.add(Box.createVerticalStrut(10)); // 메시지 간 간격 추가
+
+     // Ensure the chat panel is updated and scrolled to the bottom
+        SwingUtilities.invokeLater(() -> {
+            chatPanel.revalidate();
+            chatPanel.repaint();
+            
+            // Scroll to the bottom
+            JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, chatPanel);
+            if (scrollPane != null) {
+                JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
+                verticalScrollBar.setValue(verticalScrollBar.getMaximum());
+            }
+        });
+        
     }
+
+/*
+
+    // 채팅 패널을 감싸는 스크롤 설정 (초기화 시 설정)
+    private void setupChatScrollPane() {
+        JScrollPane scrollPane = new JScrollPane(chatPanel);
+        scrollPane.getVerticalScrollBar().setUI(new ScrollBarUI());
+       scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder()); // 테두리 제거
+        chatPanel.add(scrollPane, BorderLayout.CENTER); // 메인 프레임에 추가
+    }
+
+*/
+
+        // HTML 형식으로 메시지 포맷팅
+        private String formatMessage(String message) {
+            StringBuffer formattedMessage = new StringBuffer("<html>");
+            int maxLineLength = 30; // 최대 길이 설정
+            for (int i = 0; i < message.length(); i += maxLineLength) {
+                int end = Math.min(i + maxLineLength, message.length());
+                formattedMessage.append(message.substring(i, end)).append("<br>");
+            }
+            formattedMessage.append("</html>");
+            return formattedMessage.toString();
+        }
+
 
 
     // 둥근 모서리를 위한 Border 클래스 정의
